@@ -40,7 +40,7 @@ public class FederatedSearchExample {
 		FederatedFacade<String, Long> ff = new FederatedFacade<String, Long>(0L, 100, 2) {
 
 			@Override
-			public List<FederatedFacade<String, Long>.IRowId> populate(
+			public List<com.bizosys.hsearch.federate.FederatedFacade<String, Long>.IRowId> populate(
 					String type, String queryId, String queryDetail, List<String> params) {
 
 				
