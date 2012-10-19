@@ -1,4 +1,1 @@
-hsearch-federated
-=================
-
-Joins information from various sources and supports complete lucene query syntax.
+Federated Search searches across various sources and join data on a common key. The search syntax is compatible with lucene search syntax. Federated Search can join information between structured, unstructured, files, external API and any other sources. For example, given a customer name , it can gather information from CSV, emails, customer reposiory, complain, news paper clips and various other sources. 
