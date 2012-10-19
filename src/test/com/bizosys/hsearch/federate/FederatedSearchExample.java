@@ -28,6 +28,7 @@ import java.util.Random;
 
 import org.apache.hadoop.thirdparty.guava.common.collect.HashMultimap;
 import org.apache.hadoop.thirdparty.guava.common.collect.Multimap;
+import com.bizosys.hsearch.federate.FederatedFacade;
 
 public class FederatedSearchExample {
 
@@ -39,7 +40,7 @@ public class FederatedSearchExample {
 		FederatedFacade<String, Long> ff = new FederatedFacade<String, Long>(0L, 100, 2) {
 
 			@Override
-			public List<com.bizosys.hsearch.federate.FederatedFacade<String, Long>.IRowId> populate(
+			public List<FederatedFacade<String, Long>.IRowId> populate(
 					String type, String queryId, String queryDetail, List<String> params) {
 
 				
