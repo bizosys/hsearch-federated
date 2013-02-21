@@ -33,7 +33,7 @@ import com.oneline.ferrari.TestAll;
 
 public class FederatedSearchTest extends TestCase {
 	public static String[] modes = new String[] { "all", "random", "method"};
-	public static String mode = modes[1];  
+	public static String mode = modes[2];  
 	
 	public static void main(String[] args) throws Exception {
 		FederatedSearchTest t = new FederatedSearchTest();
@@ -45,7 +45,7 @@ public class FederatedSearchTest extends TestCase {
 	        
 		} else if  ( modes[2].equals(mode) ) {
 			t.setUp();
-			t.testAnd();
+			t.testNonOverlappingOR();
 			t.tearDown();
 		}
 	}
@@ -61,7 +61,7 @@ public class FederatedSearchTest extends TestCase {
 	public void testAnd() throws Exception {
 		FederatedFacade<Long, Integer> ff = createFederatedSearch(); 
 
-		Map<String, QueryArgs> queryDetails = new HashMap<String, QueryArgs>();
+		Map<String, QueryPart> queryDetails = new HashMap<String, QueryPart>();
 		
 		String query = "(q1 AND q2)";
 		List<FederatedFacade<Long, Integer>.IRowId> q1q2Result = ff.execute(query, queryDetails);
@@ -92,7 +92,7 @@ public class FederatedSearchTest extends TestCase {
 
 	public void testMultiThreads() throws Exception {
 		FederatedFacade<Long, Integer> ff = createFederatedSearch();
-		Map<String, QueryArgs> queryDetails = new HashMap<String, QueryArgs>();
+		Map<String, QueryPart> queryDetails = new HashMap<String, QueryPart>();
 		
 		String query = "(q1 AND q1 AND q1 AND q1 AND q1 AND q1 AND q1 AND q1 AND q1 AND q1 AND q1 AND q1 AND q1 AND q1)";
 		List<FederatedFacade<Long, Integer>.IRowId> manyResult = ff.execute(query, queryDetails);
@@ -104,7 +104,7 @@ public class FederatedSearchTest extends TestCase {
 	
 	public void testOverlappingOR() throws Exception {
 		FederatedFacade<Long, Integer> ff = createFederatedSearch();
-		Map<String, QueryArgs> queryDetails = new HashMap<String, QueryArgs>();
+		Map<String, QueryPart> queryDetails = new HashMap<String, QueryPart>();
 		
 		String query = "(q1 OR q2)";
 		List<FederatedFacade<Long, Integer>.IRowId> manyResult = ff.execute(query, queryDetails);
@@ -116,9 +116,12 @@ public class FederatedSearchTest extends TestCase {
 	
 	public void testNonOverlappingOR() throws Exception {
 		FederatedFacade<Long, Integer> ff = createFederatedSearch();
-		Map<String, QueryArgs> queryDetails = new HashMap<String, QueryArgs>();
+		Map<String, QueryPart> queryDetails = new HashMap<String, QueryPart>();
 		
-		String query = "(q1 OR q4)";
+		queryDetails.put("sql:q1", new QueryPart("*|*|m|*|*") );
+		queryDetails.put("htable:q4", new QueryPart("*|*|f|[10-20]|*") );
+		
+		String query = "(sql:q1 OR htable:q4)";
 		List<FederatedFacade<Long, Integer>.IRowId> manyResult = ff.execute(query, queryDetails);
 		assertEquals(200, manyResult.size());
 		for (FederatedFacade<Long, Integer>.IRowId iRowId : manyResult) {
@@ -135,9 +138,18 @@ public class FederatedSearchTest extends TestCase {
 
 			@Override
 			public List<FederatedFacade<Long, Integer>.IRowId> populate(
-					String type, String queryId, String queryDetail, List<String> params) {
+					String type, String queryId, String queryDetail, Map<String, Object> params) {
 
 				List<FederatedFacade<Long, Integer>.IRowId> rows = new ArrayList<FederatedFacade<Long, Integer>.IRowId>();
+				
+				System.out.println("type:" + type);
+				System.out.println("queryId:" + queryId);
+				System.out.println("queryDetail:" + queryDetail);
+				if ( null != params) {
+					for (Object param : params.values()) {
+						System.out.println(param);
+					}
+				}
 				
 				if ( queryId.equals("q1")) {
 					for ( int i=0; i<100; i++) rows.add(new KeyBucket(0L, i));

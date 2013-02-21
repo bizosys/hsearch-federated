@@ -41,7 +41,7 @@ public class FederatedSearchExample {
 
 			@Override
 			public List<com.bizosys.hsearch.federate.FederatedFacade<String, Long>.IRowId> populate(
-					String type, String queryId, String queryDetail, List<String> params) {
+					String type, String queryId, String queryDetail, Map<String, Object> params) {
 
 				
 				
@@ -68,14 +68,14 @@ public class FederatedSearchExample {
 			
 		}; 
 
-		Map<String, QueryArgs> queryDetails = new HashMap<String, QueryArgs>();
-		
-		queryDetails.put("structured:q1", new QueryArgs("select id from x where city=?", "bangalore") );
-		queryDetails.put("unstructured:q2", new QueryArgs("ABINASH") );
-		queryDetails.put("unstructured:q3", new QueryArgs("HADOOP") );
-		queryDetails.put("structured:q4", new QueryArgs("select id from y where class=? and section = ?", "IV", "5") );
+		Map<String, QueryPart> queryDetails = new HashMap<String, QueryPart>();
+		queryDetails.put("structured:q1", new QueryPart("select id from x where city=?", "city", "bangalore") );
+		queryDetails.put("unstructured:q2", new QueryPart("ABINASH") );
+		queryDetails.put("unstructured:q3", new QueryPart("HADOOP") );
+		queryDetails.put("structured:q4", new QueryPart("select id from y where class=? and section = ?", "IV", "5") );
 		String query = "structured:q1 OR unstructured:q2 OR ( unstructured:q3 OR  structured:q4)";
 		List<FederatedFacade<String, Long>.IRowId> finalResult = ff.execute(query, queryDetails);
+	
 		
 		Multimap<String, Long> mmm = HashMultimap.create();
 		for (FederatedFacade<String, Long>.IRowId aRecord : finalResult) {

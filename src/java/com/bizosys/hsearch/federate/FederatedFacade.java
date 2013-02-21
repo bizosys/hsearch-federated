@@ -22,6 +22,7 @@ package com.bizosys.hsearch.federate;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -45,13 +46,19 @@ import org.apache.lucene.search.TermRangeQuery;
 import org.apache.lucene.util.Version;
 
 public abstract class FederatedFacade<K,V> {
-	ExecutorService es = null;
-	RowJoiner JOINER = new RowJoiner();
+	
+	ConcurrentRowJoiner JOINER = new ConcurrentRowJoiner();
 	public ObjectFactory objectFactory = new ObjectFactory();
+	static Map<String, Query> cachedQueries = new HashMap<String, Query>();
+	ExecutorService es = null;
+	
+	boolean DEBUG_MODE = false;
+	
 	
 	public FederatedFacade(V val, int initialObjects, int fixedThreads) {
 		if ( fixedThreads < 2) fixedThreads = 2;
 		es = Executors.newFixedThreadPool(fixedThreads);
+		
 		for ( int i=0; i<initialObjects; i++) {
 			objectFactory.putPrimaryKeyRowId(new KeyPrimary(val));
 		}
@@ -158,7 +165,7 @@ public abstract class FederatedFacade<K,V> {
 	 * @author Abinasha Karana, Bizosys
 	 * //////////////////////////////////////////////////////////////////////////////////////////////////////////
 	 */
-	public class RowJoiner {
+	public class ConcurrentRowJoiner {
 		public void and (List<IRowId> input1, List<IRowId> input2) {
 
 			if ( null == input1 || null == input2) {
@@ -267,7 +274,7 @@ public abstract class FederatedFacade<K,V> {
 					delta.add(recordId);
 				}
 			} else {
-				//System.out.println("input1 is null");
+				if ( DEBUG_MODE )System.out.println("input1 is null");
 			}
 			mmm.clear();
 			input1.addAll(delta);
@@ -388,12 +395,12 @@ public abstract class FederatedFacade<K,V> {
 		public String maxRange = null;
 
 		HResult result = null;
-		public HResult getResult() throws Exception {
-			if ( null != result ) return result;
-			throw new Exception("Query is not executed");
+		public HResult getResult() {
+			return result;
 		}
 		
 		public void setResult(HResult result) {
+			if ( DEBUG_MODE )System.out.println(Thread.currentThread().getName() + " > setResult " + result);
 			this.result = result;
 		}
 
@@ -415,6 +422,7 @@ public abstract class FederatedFacade<K,V> {
 		}
 
 		public void setRowIds(List<IRowId> foundIds) {
+			if ( DEBUG_MODE )System.out.println(Thread.currentThread().getName() + " > setRowIds");
 			this.foundIds = foundIds;
 		}
 
@@ -433,17 +441,17 @@ public abstract class FederatedFacade<K,V> {
 			
 			boolean isFirst = true;
 			for (HQuery subQuery : query.subQueries) {
-				//System.out.println("Launching a Sub Query");
+				if ( DEBUG_MODE )System.out.println("Launching a Sub Query");
 				List<IRowId> subQResult = new ArrayList<IRowId>();
 				combine(subQuery, subQResult);
 				if ( subQuery.isShould) {
-					//System.out.println("OR Joiner of sub query result" +  "> H " + finalResult.hashCode() + ".." + subQResult.hashCode());
+					if ( DEBUG_MODE )System.out.println("OR Joiner of sub query result" +  "> H " + finalResult.hashCode() + ".." + subQResult.hashCode());
 					JOINER.or(finalResult, subQResult);
 				} else if ( subQuery.isMust) {
-					//System.out.println("AND Joiner of sub query result" +  "> H " + finalResult.hashCode() + ".." + subQResult.hashCode());
+					if ( DEBUG_MODE )System.out.println("AND Joiner of sub query result" +  "> H " + finalResult.hashCode() + ".." + subQResult.hashCode());
 					JOINER.and(finalResult, subQResult);
 				} else {
-					//System.out.println("NOT Joiner of sub query result" +  "> H " + finalResult.hashCode() + ".." + subQResult.hashCode());
+					if ( DEBUG_MODE )System.out.println("NOT Joiner of sub query result" +  "> H " + finalResult.hashCode() + ".." + subQResult.hashCode());
 					JOINER.not(finalResult, subQResult);
 				}
 				subQResult.clear();
@@ -456,11 +464,11 @@ public abstract class FederatedFacade<K,V> {
 
 				if ( isFirst ) {
 					finalResult.addAll(term.getResult().getRowIds());
-					//System.out.println("First Must :" + term.text + ":" + finalResult.size() + "> H " + finalResult.hashCode() );
+					if ( DEBUG_MODE )System.out.println("First Must :" + term.text + ":" + finalResult.size() + "> H " + finalResult.hashCode() );
 					isFirst = false;
 				} else {
 					JOINER.and(finalResult, term.getResult().getRowIds());
-					//System.out.println("Subsequnt Must :" + term.text + ":" + finalResult.size() +  "> H " + finalResult.hashCode() );;
+					if ( DEBUG_MODE )System.out.println("Subsequnt Must :" + term.text + ":" + finalResult.size() +  "> H " + finalResult.hashCode() );;
 				}
 			}
 			
@@ -471,10 +479,10 @@ public abstract class FederatedFacade<K,V> {
 				if ( isFirst ) {
 					finalResult.addAll(term.getResult().getRowIds());
 					isFirst = false;
-					//System.out.println("First OR :" + term.text + ":" + finalResult.size()  + "> H " + finalResult.hashCode() );
+					if ( DEBUG_MODE )System.out.println("First OR :" + term.text + ":" + finalResult.size()  + "> H " + finalResult.hashCode() );
 				} else {
+					if ( DEBUG_MODE )System.out.println("Subsequent OR :" + term.text + ":" + finalResult.size() + "> H " + finalResult.hashCode());
 					JOINER.or(finalResult, term.getResult().getRowIds());
-					//System.out.println("Subsequent OR :" + term.text + ":" + finalResult.size() + "> H " + finalResult.hashCode());
 				}
 			}
 			
@@ -486,7 +494,7 @@ public abstract class FederatedFacade<K,V> {
 					throw new RuntimeException("Only must not query not allowed");
 				} else {
 					JOINER.not(finalResult, term.getResult().getRowIds());
-					//System.out.println("Not :" + term.text + ":" + finalResult.size());
+					if ( DEBUG_MODE )System.out.println("Not :" + term.text + ":" + finalResult.size());
 				}
 			}
 			
@@ -506,7 +514,15 @@ public abstract class FederatedFacade<K,V> {
 
 		public HQuery parse(String query) throws Exception {
 			WhitespaceAnalyzer analyzer = new WhitespaceAnalyzer(Version.LUCENE_35);
-			Query qp = new QueryParser(Version.LUCENE_35,"", analyzer).parse(query);
+
+			//TODO: Come up with a logic of finding most freq
+			Query qp = null;
+			if ( cachedQueries.containsKey(query)) {
+				qp = cachedQueries.get(query);
+			} else {
+				qp = new QueryParser(Version.LUCENE_35,"", analyzer).parse(query);
+				cachedQueries.put(query, qp);
+			}
 			HQuery hQuery = new HQuery();
 			parseComposites(qp, hQuery);
 			return hQuery;
@@ -568,7 +584,7 @@ public abstract class FederatedFacade<K,V> {
 				hTerm.maxRange = lTerm.getUpperTerm();
 
 			} else {
-				//System.out.println("Not Implemented Query :" + subQueryL.getClass().toString());;
+				if ( DEBUG_MODE )System.out.println("Not Implemented Query :" + subQueryL.getClass().toString());;
 				hTerm.type = "Not Impemented";
 				hTerm.text = "Not Impemented";
 			}
@@ -600,7 +616,7 @@ public abstract class FederatedFacade<K,V> {
 		}
 	}
 
-	public List<IRowId> execute(String query, Map<String, QueryArgs> queryArgs) throws Exception {
+	public List<IRowId> execute(String query, Map<String, QueryPart> queryArgs) throws Exception {
 		HQuery hquery = new HQueryParser().parse(query);
 
 		List<FederatedSource> sources = new ArrayList<FederatedSource>();
@@ -611,7 +627,12 @@ public abstract class FederatedFacade<K,V> {
 		for (HTerm aTerm : terms) {
 			FederatedSource fs = new FederatedSource();
 			fs.setTerm(aTerm);
-			fs.setQueryDetails(queryArgs.get(aTerm.type + ":" + aTerm.text));
+			
+			String name = aTerm.text;
+			if ( null != aTerm.type ) {
+				if ( aTerm.type.length() > 0 ) name =  aTerm.type + ":" + name;
+			}
+			fs.setQueryDetails(queryArgs.get(name));
 			sources.add(fs);
 		}
 
@@ -624,9 +645,11 @@ public abstract class FederatedFacade<K,V> {
 			for (FederatedSource iFederatedSource : sources) {
 				tasks.add(new FederatedExecutor(iFederatedSource));
 			}
-			//System.out.println("Invoking..");
+			if ( DEBUG_MODE )System.out.println(Thread.currentThread().getName() + " > Invoking..");
+
 			es.invokeAll(tasks);
-			//System.out.println("Invoking.. Done");
+			
+			if ( DEBUG_MODE )System.out.println(Thread.currentThread().getName() + " > Invoking.. Done");
 		}
 		
 		
@@ -646,34 +669,35 @@ public abstract class FederatedFacade<K,V> {
 	public class FederatedSource {
 		
 		HTerm term = null;
-		QueryArgs queryMappings = null;
+		QueryPart queryMappings = null;
 		
 		public FederatedSource() {
 		}
 		
 		protected void execute() throws Exception {
+			if ( DEBUG_MODE) System.out.println(Thread.currentThread().getName() + " > FederatedFacade.execute");
 			
-			List<String> params = null;
-			if ( null != this.queryMappings) {
-				if ( null == this.queryMappings.getParams() ) {
-					//System.out.println("********" + this.term.text + ">" + this.term.type + "\n" + this.queryMappings.query);
-				} else {
-					//System.out.println("********" + this.term.text + ">" + this.term.type + "\n" + this.queryMappings.query + ">" + this.queryMappings.getParams().toString());
-				}
-				params = queryMappings.getParams();
-			}
-			String q = ( null != queryMappings) ? queryMappings.query : "";
+			Map<String, Object> params = ( null == this.queryMappings) ? new HashMap<String, Object>() : queryMappings.getParams();
+			String q = ( null == queryMappings) ? "" : queryMappings.aStmtOrValue;
 			
 			HResult result = new HResult();
-			result.setRowIds(populate(term.type, term.text, q, params));
+			List<IRowId> matchingIds = populate(term.type, term.text, q, params);
+			if ( DEBUG_MODE) System.out.println(Thread.currentThread().getName() + " > FederatedFacade.execute populate");
+			
+			result.setRowIds(matchingIds);
+			if ( DEBUG_MODE) System.out.println(Thread.currentThread().getName() + " > FederatedFacade.execute Matched result.setRowIds");
+
+			if ( null == result.foundIds) if ( DEBUG_MODE) System.out.println("WARNING : result.foundIds null");
 			this.term.setResult(result);
+			if ( DEBUG_MODE) System.out.println(Thread.currentThread().getName() + " > FederatedFacade.execute Matched term.setResult");
+
 		}
 		
 		public void setTerm(HTerm term) {
 			this.term = term;
 		}
 		
-		public void setQueryDetails(QueryArgs queryMappings) {
+		public void setQueryDetails(QueryPart queryMappings) {
 			this.queryMappings = queryMappings;
 		}
 		
@@ -681,7 +705,7 @@ public abstract class FederatedFacade<K,V> {
 			return this.term;
 		}
 		
-		public QueryArgs getQueryDetails() {
+		public QueryPart getQueryDetails() {
 			return this.queryMappings;
 		}
 		
@@ -730,6 +754,14 @@ public abstract class FederatedFacade<K,V> {
 		
 	}	
 	
-	public abstract List<IRowId> populate(String type, String queryId, String queryDetail, List<String> params) throws IOException;
+	/**
+	 *  queryId 	:	q1, q2
+	 *  type    	:	sql, htable
+	 *  aStmtOrValue:	*|*|m|*|* ,  *|*|f|[10-20]|*
+	 *  sql:q1		:	new QueryPart("*|*|m|*|*")
+	 *  htable:q4	:	new QueryPart("*|*|f|[10-20]|*")
+	 *  (sql:q1 OR htable:q4)";
+	 */
+	public abstract List<IRowId> populate(String type, String queryId, String aStmtOrValue, Map<String, Object> stmtParams) throws IOException;
 	
 }
