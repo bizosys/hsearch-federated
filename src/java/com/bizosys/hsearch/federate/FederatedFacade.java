@@ -52,7 +52,7 @@ public abstract class FederatedFacade<K,V> {
 	static Map<String, Query> cachedQueries = new HashMap<String, Query>();
 	ExecutorService es = null;
 	
-	boolean DEBUG_MODE = false;
+	public boolean DEBUG_MODE = true;
 	
 	
 	public FederatedFacade(V val, int initialObjects, int fixedThreads) {
@@ -617,6 +617,8 @@ public abstract class FederatedFacade<K,V> {
 	}
 
 	public List<IRowId> execute(String query, Map<String, QueryPart> queryArgs) throws Exception {
+		System.out.println("FederatedFacade.execute ENTER ");
+
 		HQuery hquery = new HQueryParser().parse(query);
 
 		List<FederatedSource> sources = new ArrayList<FederatedSource>();
@@ -637,8 +639,11 @@ public abstract class FederatedFacade<K,V> {
 		}
 
 		int sourcesT = sources.size();
+		System.out.println("FederatedFacade : execute sourcesT :  " + sourcesT);
 		if (sourcesT == 1) {
+			System.out.println("FederatedFacade : Source Execute Enter.");
 			sources.get(0).execute();
+			System.out.println("FederatedFacade : Source Execute Exit.");
 		} else {
 			List<FederatedExecutor> tasks = new ArrayList<FederatedExecutor>();
 			
@@ -682,12 +687,17 @@ public abstract class FederatedFacade<K,V> {
 			
 			HResult result = new HResult();
 			List<IRowId> matchingIds = populate(term.type, term.text, q, params);
-			if ( DEBUG_MODE) System.out.println(Thread.currentThread().getName() + " > FederatedFacade.execute populate");
+			if ( DEBUG_MODE) System.out.println(Thread.currentThread().getName() + " > FederatedFacade.execute populate - ");
 			
 			result.setRowIds(matchingIds);
 			if ( DEBUG_MODE) System.out.println(Thread.currentThread().getName() + " > FederatedFacade.execute Matched result.setRowIds");
 
-			if ( null == result.foundIds) if ( DEBUG_MODE) System.out.println("WARNING : result.foundIds null");
+			if ( null == result.foundIds) {
+				if ( DEBUG_MODE) System.out.println("WARNING : result.foundIds null");
+			} else {
+				if ( DEBUG_MODE) System.out.println("DEBUG : result.foundIds " + result.foundIds.size());
+			}
+			
 			this.term.setResult(result);
 			if ( DEBUG_MODE) System.out.println(Thread.currentThread().getName() + " > FederatedFacade.execute Matched term.setResult");
 
