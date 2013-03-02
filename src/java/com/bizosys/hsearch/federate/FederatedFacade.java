@@ -32,8 +32,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.apache.hadoop.thirdparty.guava.common.collect.HashMultimap;
-import org.apache.hadoop.thirdparty.guava.common.collect.Multimap;
 import org.apache.lucene.analysis.WhitespaceAnalyzer;
 import org.apache.lucene.queryParser.QueryParser;
 import org.apache.lucene.search.BooleanClause;
@@ -44,6 +42,9 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TermRangeQuery;
 import org.apache.lucene.util.Version;
+
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 
 public abstract class FederatedFacade<K,V> {
 	

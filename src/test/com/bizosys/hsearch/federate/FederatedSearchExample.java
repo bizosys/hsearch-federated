@@ -26,9 +26,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import org.apache.hadoop.thirdparty.guava.common.collect.HashMultimap;
-import org.apache.hadoop.thirdparty.guava.common.collect.Multimap;
 import com.bizosys.hsearch.federate.FederatedFacade;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 
 public class FederatedSearchExample {
 
