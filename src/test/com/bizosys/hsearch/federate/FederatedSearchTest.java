@@ -33,7 +33,7 @@ import com.oneline.ferrari.TestAll;
 
 public class FederatedSearchTest extends TestCase {
 	public static String[] modes = new String[] { "all", "random", "method"};
-	public static String mode = modes[1];  
+	public static String mode = modes[2];  
 	
 	public static void main(String[] args) throws Exception {
 		FederatedSearchTest t = new FederatedSearchTest();
@@ -45,7 +45,7 @@ public class FederatedSearchTest extends TestCase {
 	        
 		} else if  ( modes[2].equals(mode) ) {
 			t.setUp();
-			t.testNonOverlappingOR();
+			t.testAndIdTypeString();
 			t.tearDown();
 		}
 	}
@@ -89,6 +89,38 @@ public class FederatedSearchTest extends TestCase {
 		}		
 	}
 
+	public void testAndIdTypeString() throws Exception {
+		FederatedFacade<Long, String> ff = createFederatedSearchString(); 
+
+		Map<String, QueryPart> queryDetails = new HashMap<String, QueryPart>();
+		
+		String query = "(q1 AND q2)";
+		List<FederatedFacade<Long, String>.IRowId> q1q2Result = ff.execute(query, queryDetails);
+		assertEquals(25, q1q2Result.size());
+		for (FederatedFacade<Long, String>.IRowId iRowId : q1q2Result) {
+			assertTrue( ( new Integer( iRowId.getDocId() ) >= 75 &&  new Integer( iRowId.getDocId() ) < 100) );		
+		}
+		
+		query = "(q1 AND q3)";
+		List<FederatedFacade<Long, String>.IRowId> q1q3Result = ff.execute(query, queryDetails);
+		assertEquals(1, q1q3Result.size());
+		for (FederatedFacade<Long, String>.IRowId iRowId : q1q3Result) {
+			Integer i = new Integer( iRowId.getDocId() );
+			assertTrue( i.intValue() == 0 );		
+		}
+		
+		query = "(q2 AND q3)";
+		List<FederatedFacade<Long, String>.IRowId> q2q3Result = ff.execute(query, queryDetails);
+		assertEquals(0, q2q3Result.size());
+
+		query = "(q1 AND q1 AND q1 AND q1 AND q1 AND q1 AND q1 AND q1 AND q1 AND q1 AND q1 AND q1 AND q1 AND q1)";
+		List<FederatedFacade<Long, String>.IRowId> manyResult = ff.execute(query, queryDetails);
+		assertEquals(100, manyResult.size());
+		for (FederatedFacade<Long, String>.IRowId iRowId : q1q2Result) {
+			Integer i = new Integer( iRowId.getDocId() );
+			assertTrue( i.intValue()  >= 0 &&  i.intValue() < 100 );		
+		}		
+	}
 
 	public void testMultiThreads() throws Exception {
 		FederatedFacade<Long, Integer> ff = createFederatedSearch();
@@ -167,5 +199,38 @@ public class FederatedSearchTest extends TestCase {
 		return ff;
 	}
 	
+	private FederatedFacade<Long, String> createFederatedSearchString() {
+		FederatedFacade<Long, String> ff = new FederatedFacade<Long, String>("", 100, 10) {
+
+			@Override
+			public List<FederatedFacade<Long, String>.IRowId> populate(
+					String type, String queryId, String queryDetail, Map<String, Object> params) {
+
+				List<FederatedFacade<Long, String>.IRowId> rows = new ArrayList<FederatedFacade<Long, String>.IRowId>();
+				
+				System.out.println("type:" + type);
+				System.out.println("queryId:" + queryId);
+				System.out.println("queryDetail:" + queryDetail);
+				if ( null != params) {
+					for (Object param : params.values()) {
+						System.out.println(param);
+					}
+				}
+				
+				if ( queryId.equals("q1")) {
+					for ( int i=0; i<100; i++) rows.add(new KeyBucket(0L, new Integer(i).toString()));
+				} else if ( queryId.equals("q2")) {
+					for ( int i=75; i<200; i++) rows.add(new KeyBucket(0L, new Integer(i).toString()) );
+				} else if ( queryId.equals("q3")) {
+					for ( int i=-11; i<1; i++) rows.add(new KeyBucket(0L, new Integer(i).toString()) );
+				} else if ( queryId.equals("q4")) {
+					for ( int i=-200; i<-100; i++) rows.add(new KeyBucket(0L, new Integer(i).toString()) );
+				}
+				return rows;
+			}
+			
+		};
+		return ff;
+	}
 		
 }
