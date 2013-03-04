@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
+import java.util.Vector;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -397,11 +398,14 @@ public abstract class FederatedFacade<K,V> {
 
 		HResult result = null;
 		public HResult getResult() {
+			if ( DEBUG_MODE )System.out.println(Thread.currentThread().getName() + 
+				" HTerm > getResult null : " + ( null == result));
 			return result;
 		}
 		
 		public void setResult(HResult result) {
-			if ( DEBUG_MODE )System.out.println(Thread.currentThread().getName() + " > setResult " + result);
+			if ( DEBUG_MODE )System.out.println(Thread.currentThread().getName() + 
+				" HTerm > setResult : null == " + ( null == result) );
 			this.result = result;
 		}
 
@@ -419,11 +423,13 @@ public abstract class FederatedFacade<K,V> {
 		List<IRowId> foundIds = null;
 		
 		public List<IRowId> getRowIds() {
-			return this.foundIds;
+			if ( DEBUG_MODE ) System.out.println(Thread.currentThread().getName() + " HResult > getRowIds ," + this.hashCode());
+			
+			return this.foundIds ;
 		}
 
 		public void setRowIds(List<IRowId> foundIds) {
-			if ( DEBUG_MODE )System.out.println(Thread.currentThread().getName() + " > setRowIds");
+			if ( DEBUG_MODE ) System.out.println(Thread.currentThread().getName() + " HResult > setRowIds ," + this.hashCode());
 			this.foundIds = foundIds;
 		}
 
@@ -440,66 +446,75 @@ public abstract class FederatedFacade<K,V> {
 
 		public List<IRowId> combine(HQuery query, List<IRowId> finalResult) throws Exception  {
 			
-			boolean isFirst = true;
-			for (HQuery subQuery : query.subQueries) {
-				if ( DEBUG_MODE )System.out.println("Launching a Sub Query");
-				List<IRowId> subQResult = new ArrayList<IRowId>();
-				combine(subQuery, subQResult);
-				if ( subQuery.isShould) {
-					if ( DEBUG_MODE )System.out.println("OR Joiner of sub query result" +  "> H " + finalResult.hashCode() + ".." + subQResult.hashCode());
-					JOINER.or(finalResult, subQResult);
-				} else if ( subQuery.isMust) {
-					if ( DEBUG_MODE )System.out.println("AND Joiner of sub query result" +  "> H " + finalResult.hashCode() + ".." + subQResult.hashCode());
-					JOINER.and(finalResult, subQResult);
-				} else {
-					if ( DEBUG_MODE )System.out.println("NOT Joiner of sub query result" +  "> H " + finalResult.hashCode() + ".." + subQResult.hashCode());
-					JOINER.not(finalResult, subQResult);
+			try {
+				boolean isFirst = true;
+				for (HQuery subQuery : query.subQueries) {
+					
+					if ( DEBUG_MODE )System.out.println("Launching a Sub Query");
+					List<IRowId> subQResult = new ArrayList<IRowId>();
+					combine(subQuery, subQResult);
+					
+					if ( subQuery.isShould) {
+						if ( DEBUG_MODE )System.out.println("OR Joiner of sub query result" +  "> H " + finalResult.hashCode() + ".." + subQResult.hashCode());
+						JOINER.or(finalResult, subQResult);
+					} else if ( subQuery.isMust) {
+						if ( DEBUG_MODE )System.out.println("AND Joiner of sub query result" +  "> H " + finalResult.hashCode() + ".." + subQResult.hashCode());
+						JOINER.and(finalResult, subQResult);
+					} else {
+						if ( DEBUG_MODE )System.out.println("NOT Joiner of sub query result" +  "> H " + finalResult.hashCode() + ".." + subQResult.hashCode());
+						JOINER.not(finalResult, subQResult);
+					}
+					subQResult.clear();
 				}
-				subQResult.clear();
-			}
-			
-			//Find must terms and add them
-			for (HTerm term : query.terms) {
-				if ( term.isShould ) continue;
-				if ( ! term.isMust ) continue;
+				
+				//Find must terms and add them
+				for (HTerm term : query.terms) {
+					if ( term.isShould ) continue;
+					if ( ! term.isMust ) continue;
 
-				if ( isFirst ) {
-					finalResult.addAll(term.getResult().getRowIds());
-					if ( DEBUG_MODE )System.out.println("First Must :" + term.text + ":" + finalResult.size() + "> H " + finalResult.hashCode() );
-					isFirst = false;
-				} else {
-					JOINER.and(finalResult, term.getResult().getRowIds());
-					if ( DEBUG_MODE )System.out.println("Subsequnt Must :" + term.text + ":" + finalResult.size() +  "> H " + finalResult.hashCode() );;
+					HResult result = term.getResult();
+					if ( isFirst ) {
+						finalResult.addAll(result.getRowIds());
+						if ( DEBUG_MODE )System.out.println("First Must :" + term.text + ":" + finalResult.size() + "> H " + finalResult.hashCode() );
+						isFirst = false;
+					} else {
+						JOINER.and(finalResult, result.getRowIds());
+						if ( DEBUG_MODE )System.out.println("Subsequnt Must :" + term.text + ":" + finalResult.size() +  "> H " + finalResult.hashCode() );;
+					}
 				}
-			}
-			
-			//OR Terms
-			for (HTerm term : query.terms) {
-				if ( ! term.isShould ) continue;
+				
+				//OR Terms
+				for (HTerm term : query.terms) {
+					if ( ! term.isShould ) continue;
 
-				if ( isFirst ) {
-					finalResult.addAll(term.getResult().getRowIds());
-					isFirst = false;
-					if ( DEBUG_MODE )System.out.println("First OR :" + term.text + ":" + finalResult.size()  + "> H " + finalResult.hashCode() );
-				} else {
-					if ( DEBUG_MODE )System.out.println("Subsequent OR :" + term.text + ":" + finalResult.size() + "> H " + finalResult.hashCode());
-					JOINER.or(finalResult, term.getResult().getRowIds());
+					HResult result = term.getResult();
+					if ( isFirst ) {
+						finalResult.addAll(result.getRowIds());
+						isFirst = false;
+						if ( DEBUG_MODE )System.out.println("First OR :" + term.text + ":" + finalResult.size()  + "> H " + finalResult.hashCode() );
+					} else {
+						if ( DEBUG_MODE )System.out.println("Subsequent OR :" + term.text + ":" + finalResult.size() + "> H " + finalResult.hashCode());
+						JOINER.or(finalResult, result.getRowIds());
+					}
 				}
-			}
-			
-			for (HTerm term : query.terms) {
-				if ( term.isShould ) continue;
-				if ( term.isMust) continue;
+				
+				for (HTerm term : query.terms) {
+					if ( term.isShould ) continue;
+					if ( term.isMust) continue;
 
-				if ( isFirst ) {
-					throw new RuntimeException("Only must not query not allowed");
-				} else {
-					JOINER.not(finalResult, term.getResult().getRowIds());
-					if ( DEBUG_MODE )System.out.println("Not :" + term.text + ":" + finalResult.size());
+					if ( isFirst ) {
+						throw new RuntimeException("Only must not query not allowed");
+					} else {
+						JOINER.not(finalResult, term.getResult().getRowIds());
+						if ( DEBUG_MODE )System.out.println("Not :" + term.text + ":" + finalResult.size());
+					}
 				}
+				return finalResult;
+			} catch (Exception e) {
+				e.printStackTrace(System.err);
+				throw new Exception(e);
 			}
 			
-			return finalResult;
 		}
 
 	}
@@ -618,51 +633,54 @@ public abstract class FederatedFacade<K,V> {
 	}
 
 	public List<IRowId> execute(String query, Map<String, QueryPart> queryArgs) throws Exception {
-		System.out.println("FederatedFacade.execute ENTER ");
-
-		HQuery hquery = new HQueryParser().parse(query);
-
-		List<FederatedSource> sources = new ArrayList<FederatedSource>();
-		List<HTerm> terms = new ArrayList<HTerm>();
 		
-		new HQuery().toTerms(hquery, terms);
-		
-		for (HTerm aTerm : terms) {
-			FederatedSource fs = new FederatedSource();
-			fs.setTerm(aTerm);
+		if ( DEBUG_MODE) System.out.println("FederatedFacade.execute Main - ENTER ");
+
+		try {
+			HQuery hquery = new HQueryParser().parse(query);
+	
+			List<FederatedSource> sources = new ArrayList<FederatedSource>();
+			List<HTerm> terms = new ArrayList<HTerm>();
 			
-			String name = aTerm.text;
-			if ( null != aTerm.type ) {
-				if ( aTerm.type.length() > 0 ) name =  aTerm.type + ":" + name;
+			new HQuery().toTerms(hquery, terms);
+			
+			for (HTerm aTerm : terms) {
+				FederatedSource fs = new FederatedSource();
+				fs.setTerm(aTerm);
+				
+				String name = aTerm.text;
+				if ( null != aTerm.type ) {
+					if ( aTerm.type.length() > 0 ) name =  aTerm.type + ":" + name;
+				}
+				if ( DEBUG_MODE) System.out.println("Term :" + name);
+				
+				fs.setQueryDetails(queryArgs.get(name));
+				sources.add(fs);
 			}
-			fs.setQueryDetails(queryArgs.get(name));
-			sources.add(fs);
-		}
-
-		int sourcesT = sources.size();
-		System.out.println("FederatedFacade : execute sourcesT :  " + sourcesT);
-		if (sourcesT == 1) {
-			System.out.println("FederatedFacade : Source Execute Enter.");
-			sources.get(0).execute();
-			System.out.println("FederatedFacade : Source Execute Exit.");
-		} else {
-			List<FederatedExecutor> tasks = new ArrayList<FederatedExecutor>();
+	
+			if ( DEBUG_MODE) System.out.println("FederatedFacade.execute Query Setting - COMPLETED ");
 			
-			for (FederatedSource iFederatedSource : sources) {
-				tasks.add(new FederatedExecutor(iFederatedSource));
+			int sourcesT = sources.size();
+			if (sourcesT == 1) {
+				sources.get(0).execute();
+			} else {
+				List<FederatedExecutor> tasks = new Vector<FederatedExecutor>();
+				
+				for (FederatedSource iFederatedSource : sources) {
+					tasks.add(new FederatedExecutor(iFederatedSource));
+				}
+				if ( DEBUG_MODE )System.out.println(Thread.currentThread().getName() + " > Parallel Execution of Sub Queries..");
+				es.invokeAll(tasks);
 			}
-			if ( DEBUG_MODE )System.out.println(Thread.currentThread().getName() + " > Invoking..");
-
-			es.invokeAll(tasks);
+			if ( DEBUG_MODE) System.out.println("FederatedFacade.execute Query Populate- COMPLETED ");
 			
-			if ( DEBUG_MODE )System.out.println(Thread.currentThread().getName() + " > Invoking.. Done");
+			List<IRowId> finalResult = new ArrayList<IRowId>();
+			new HQueryCombiner().combine(hquery, finalResult);
+			return finalResult;
+		} finally {
+			if ( DEBUG_MODE) System.out.println("FederatedFacade.execute Main - EXIT ");
 		}
 		
-		
-		List<IRowId> finalResult = new ArrayList<IRowId>();
-		new HQueryCombiner().combine(hquery, finalResult);
-		
-		return finalResult;
 	}
 	
 	
@@ -681,26 +699,27 @@ public abstract class FederatedFacade<K,V> {
 		}
 		
 		protected void execute() throws Exception {
-			if ( DEBUG_MODE) System.out.println(Thread.currentThread().getName() + " > FederatedFacade.execute");
+			if ( DEBUG_MODE) System.out.println(Thread.currentThread().getName() + " > FederatedFacade.execute : ENTER");
 			
 			Map<String, Object> params = ( null == this.queryMappings) ? new HashMap<String, Object>() : queryMappings.getParams();
 			String q = ( null == queryMappings) ? "" : queryMappings.aStmtOrValue;
 			
 			HResult result = new HResult();
 			List<IRowId> matchingIds = populate(term.type, term.text, q, params);
-			if ( DEBUG_MODE) System.out.println(Thread.currentThread().getName() + " > FederatedFacade.execute populate - ");
+			if ( DEBUG_MODE) System.out.println(Thread.currentThread().getName() +
+					" > FederatedFacade.execute populate completed with output : null = " + ( null == matchingIds) );
 			
 			result.setRowIds(matchingIds);
-			if ( DEBUG_MODE) System.out.println(Thread.currentThread().getName() + " > FederatedFacade.execute Matched result.setRowIds");
 
 			if ( null == result.foundIds) {
-				if ( DEBUG_MODE) System.out.println("WARNING : result.foundIds null");
+				System.out.println("WARNING : result.foundIds null");
 			} else {
-				if ( DEBUG_MODE) System.out.println("DEBUG : result.foundIds " + result.foundIds.size());
+				if ( DEBUG_MODE) System.out.println("DEBUG : result.foundIds " + result.foundIds.size() );
 			}
 			
-			this.term.setResult(result);
-			if ( DEBUG_MODE) System.out.println(Thread.currentThread().getName() + " > FederatedFacade.execute Matched term.setResult");
+			if ( DEBUG_MODE) System.out.println("XX");
+			term.setResult(result);
+			if ( DEBUG_MODE) System.out.println(Thread.currentThread().getName() + " > FederatedFacade.execute : EXIT");
 
 		}
 		
