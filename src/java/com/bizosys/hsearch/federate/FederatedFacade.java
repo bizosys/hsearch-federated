@@ -49,18 +49,22 @@ import com.google.common.collect.Multimap;
 
 public abstract class FederatedFacade<K,V> {
 	
+	/**
+	 * We have I/O Waits here as we read from the HBase. 
+	 * So we don't want to serialize the things as the reading is happening.
+	 */
+	public static final ExecutorService es = 
+		Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * 4);
+
+	static Map<String, Query> cachedQueries = new HashMap<String, Query>();
+
 	ConcurrentRowJoiner JOINER = new ConcurrentRowJoiner();
 	public ObjectFactory objectFactory = new ObjectFactory();
-	static Map<String, Query> cachedQueries = new HashMap<String, Query>();
-	ExecutorService es = null;
 	
 	public boolean DEBUG_MODE = true;
 	
 	
 	public FederatedFacade(V val, int initialObjects, int fixedThreads) {
-		if ( fixedThreads < 2) fixedThreads = 2;
-		es = Executors.newFixedThreadPool(fixedThreads);
-		
 		for ( int i=0; i<initialObjects; i++) {
 			objectFactory.putPrimaryKeyRowId(new KeyPrimary(val));
 		}
