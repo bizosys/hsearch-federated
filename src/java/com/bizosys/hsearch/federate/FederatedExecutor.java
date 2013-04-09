@@ -6,16 +6,16 @@ import java.util.concurrent.Callable;
  * Executes in parallel using multiple threads.
  * @author Abinasha Karana, Bizosys
  */
-public class FederatedExecutor implements Callable<Integer> {
+public final class FederatedExecutor implements Callable<Integer> {
 
 	FederatedSource source = null; 
 
-	public FederatedExecutor(FederatedSource aSource) {
+	public FederatedExecutor(final FederatedSource aSource) {
 		this.source = aSource;
 	}
 	
 	@Override
-	public Integer call() throws Exception {
+	public final Integer call() throws Exception {
 		try {
 			source.execute();
 			return 0;

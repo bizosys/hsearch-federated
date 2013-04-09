@@ -8,7 +8,7 @@ import java.util.List;
  * @author Abinasha Karana, Bizosys
  */
 
-public class HQuery {
+public final class HQuery {
 
 	protected boolean isShould = false;
 	protected boolean isMust = false;
@@ -18,14 +18,14 @@ public class HQuery {
 	public List<HTerm> terms = new ArrayList<HTerm>();
 	
 
-	public void toTerms(HQuery query, List<HTerm> terms) {
+	public final void toTerms(final HQuery query, final List<HTerm> terms) {
 		for (HQuery subQuery : query.subQueries) {
 			toTerms(subQuery, terms);
 		}
 		terms.addAll(query.terms);
 	}
 	
-	public String toString(String level) {
+	public final String toString(final String level) {
 		StringBuilder sb = new StringBuilder();
 		sb.append(level).append("**********").append(":Must-");
 		sb.append(isMust).append(":Should-").append( isShould).append(":Fuzzy-");

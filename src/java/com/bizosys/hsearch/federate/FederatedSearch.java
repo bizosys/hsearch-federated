@@ -39,7 +39,7 @@ public abstract class FederatedSearch {
 		this (-1);
 	}
 	
-	public FederatedSearch(int fixedThreads) {
+	public FederatedSearch(final int fixedThreads) {
 		if ( null == es) {
 			synchronized ("FederatedFacade") {
 				if ( null == es) {
@@ -54,7 +54,7 @@ public abstract class FederatedSearch {
 		}
 	}
 	
-	public BitSetOrSet execute(String query, Map<String, QueryPart> queryArgs) 
+	public final BitSetOrSet execute(final String query, final Map<String, QueryPart> queryArgs) 
 		throws FederatedSearchException, IOException, InterruptedException {
 		
 		if ( DEBUG_MODE) FederatedSearchLog.l.debug("FederatedFacade.execute Main - ENTER ");
@@ -112,6 +112,84 @@ public abstract class FederatedSearch {
 		}
 		
 	}
+	
+	private HQuery hquery = null;
+	private List<HTerm> terms = null;
+	private BitSetOrSet finalResult = null;
+	private HQueryCombiner combiner = null;
+	
+	public final void initialize(final String query) 
+			throws FederatedSearchException, IOException, InterruptedException {
+			
+			if ( DEBUG_MODE) FederatedSearchLog.l.debug("FederatedFacade.initialize - ENTER > " + query);
+
+			this.hquery = new HQueryParser().parse(query);
+			this.terms = new ArrayList<HTerm>();
+			new HQuery().toTerms(hquery, terms);
+
+			this.finalResult = new BitSetOrSet();
+			this.combiner = new HQueryCombiner();
+
+			if ( DEBUG_MODE) FederatedSearchLog.l.debug("FederatedFacade.execute initialize - EXIT ");
+		}
+
+	
+	public final BitSetOrSet execute(final Map<String, QueryPart> queryArgs) 
+			throws FederatedSearchException, IOException, InterruptedException {
+			
+			if ( DEBUG_MODE) FederatedSearchLog.l.debug("FederatedFacade.execute Main - ENTER ");
+
+			int termsT = (null == terms) ? 0 : terms.size();
+			if ( termsT <= 0 ) termsT = 1;
+			List<FederatedSource> sources = new ArrayList<FederatedSource>(termsT);
+			
+			try {
+				for (HTerm aTerm : terms) {
+					if ( null == aTerm) continue; 
+					
+					aTerm.reset();
+					
+					FederatedSource fs = new FederatedSource(this);
+					fs.setTerm(aTerm);
+					
+					String name = aTerm.text;
+					if ( null != aTerm.type ) {
+						if ( aTerm.type.length() > 0 ) name =  aTerm.type + ":" + name;
+					}
+					if ( DEBUG_MODE) FederatedSearchLog.l.debug("Term :" + name);
+					
+					fs.setQueryDetails(queryArgs.get(name));
+					sources.add(fs);
+				}
+		
+				if ( DEBUG_MODE) FederatedSearchLog.l.debug("FederatedFacade.execute Query Setting - COMPLETED ");
+				
+				int sourcesT = sources.size();
+				
+				if (sourcesT == 1) {
+					sources.get(0).execute();
+				} else {
+					List<FederatedExecutor> tasks = new ArrayList<FederatedExecutor>();
+					for (FederatedSource iFederatedSource : sources) {
+						tasks.add(new FederatedExecutor(iFederatedSource));
+					}
+					if ( INFO_MODE )FederatedSearchLog.l.info(
+						Thread.currentThread().getName() + " > Parallel Execution of Sub Queries .. " + sourcesT);
+					es.invokeAll(tasks);
+				}
+				
+				if ( DEBUG_MODE) FederatedSearchLog.l.debug("FederatedFacade.execute Query Populate- COMPLETED ");
+				
+				finalResult.reset();
+				combiner.reset();
+				combiner.combine(hquery, finalResult);
+				return finalResult;
+				
+			} finally {
+				if ( DEBUG_MODE) FederatedSearchLog.l.debug("FederatedFacade.execute Main - EXIT ");
+			}
+			
+		}	
 	
 	
 	/**

@@ -23,30 +23,30 @@ package com.bizosys.hsearch.federate;
 import java.util.HashMap;
 import java.util.Map;
 
-public class QueryPart {
+public final class QueryPart {
 
 	public String aStmtOrValue;
 	private Map<String, Object> paramsForStmt = null;
 	
-	public QueryPart(String query) {
+	public QueryPart(final String query) {
 		this.aStmtOrValue = query;
 	}
 	
-	public QueryPart(String query, String aName, Object value) {
+	public QueryPart(final String query, final String aName, final Object value) {
 		this(query);
 		setParam ( aName, value);
 	}
 
-	public QueryPart(String query, Map<String, Object> paramsForStmt) {
+	public QueryPart(final String query, final Map<String, Object> paramsForStmt) {
 		this.aStmtOrValue = query;
 		this.paramsForStmt = paramsForStmt;
 	}
 
-	public Map<String, Object> getParams() {
+	public final Map<String, Object> getParams() {
 		return this.paramsForStmt;
 	}
 	
-	public void setParam ( String name, Object value){
+	public final void setParam ( final String name, final Object value){
 		if ( null == paramsForStmt) paramsForStmt = new HashMap<String, Object>();
 		paramsForStmt.put(name, value);
 	}

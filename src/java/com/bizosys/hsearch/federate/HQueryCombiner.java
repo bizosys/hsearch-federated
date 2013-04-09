@@ -5,14 +5,14 @@ package com.bizosys.hsearch.federate;
  * Combines output from all the sources with appropriate sequencing
  * @author Abinasha Karana, Bizosys
  */
-public class HQueryCombiner {
+public final class HQueryCombiner {
 
 	private static boolean DEBUG_MODE = FederatedSearchLog.l.isDebugEnabled();
 	//private static boolean INFO_MODE = FederatedSearchLog.l.isInfoEnabled();
 	
 	boolean isFirst = true;
 	
-	public BitSetOrSet combine(HQuery query, BitSetOrSet destination) throws FederatedSearchException  {
+	public final  BitSetOrSet combine(final HQuery query, final BitSetOrSet destination) throws FederatedSearchException  {
 		
 		try {
 			
@@ -90,5 +90,10 @@ public class HQueryCombiner {
 		}
 		
 	}
+	
+	public final void reset() {
+		this.isFirst = true;
+	}
+	
 
 }

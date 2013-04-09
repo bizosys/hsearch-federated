@@ -4,18 +4,18 @@ package com.bizosys.hsearch.federate;
  * Federated Source Output
  * @author Abinasha Karana, Bizosys
  */
-public class HResult {
+public final class HResult {
 	
 	private BitSetOrSet foundIds = null;
 	
-	public BitSetOrSet getRowIds() {
+	public final  BitSetOrSet getRowIds() {
 		if ( null == this.foundIds) {
 			FederatedSearchLog.l.warn(Thread.currentThread().getName() + " > HResult get has null values");
 		}
 		return this.foundIds ;
 	}
 
-	public void setRowIds(BitSetOrSet foundIds) {
+	public final void setRowIds(final BitSetOrSet foundIds) {
 		this.foundIds = foundIds;
 
 		if ( null == this.foundIds) {
@@ -24,7 +24,7 @@ public class HResult {
 	}
 	
 	@Override
-	public String toString() {
+	public final String toString() {
 		if ( null == foundIds)	return "null";
 		return foundIds.toString();
 	}

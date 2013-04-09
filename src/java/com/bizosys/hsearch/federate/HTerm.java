@@ -4,7 +4,7 @@ package com.bizosys.hsearch.federate;
  * Federated Search Term
  * @author Abinasha Karana, Bizosys
  */
-public class HTerm {
+public final class HTerm {
 	
 	private static boolean DEBUG_MODE = FederatedSearchLog.l.isDebugEnabled();
 	//private static boolean INFO_MODE = FederatedSearchLog.l.isInfoEnabled();
@@ -20,17 +20,27 @@ public class HTerm {
 	public String maxRange = null;
 
 	HResult result = null;
-	public HResult getResult() {
+	
+	public final HResult getResult() {
 		if ( DEBUG_MODE ) FederatedSearchLog.l.debug( 
 				"Thread -" + Thread.currentThread().getName() + " HTerm > getResult null : " + ( null == result));
 		return result;
 	}
 	
-	public void setResult(HResult result) {
+	public final void setResult(final HResult result) {
 		if ( DEBUG_MODE ) FederatedSearchLog.l.debug( 
 				"Thread -" + Thread.currentThread().getName() + 
 			" HTerm > setResult : null == " + ( null == result) );
 		this.result = result;
+	}
+	
+	public final void reset() {
+		if ( null != result) this.result = null;
+	}
+	
+	@Override
+	public final String toString() {
+		return "HTerm\t" + type + ":" + text;
 	}
 
 }	

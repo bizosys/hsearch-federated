@@ -8,7 +8,7 @@ import java.util.Map;
  * For each source it runs inside a thread.
  * @author Abinasha Karana, Bizosys
  */
-public class FederatedSource {
+public final class FederatedSource {
 
 	private static boolean DEBUG_MODE = FederatedSearchLog.l.isDebugEnabled();
 	//private static boolean INFO_MODE = FederatedSearchLog.l.isInfoEnabled();
@@ -17,11 +17,11 @@ public class FederatedSource {
 	QueryPart queryMappings = null;
 	FederatedSearch searcher = null;
 	
-	public FederatedSource(FederatedSearch searcher) {
+	public FederatedSource(final FederatedSearch searcher) {
 		this.searcher = searcher;
 	}
 	
-	protected void execute() throws FederatedSearchException, IOException {
+	protected final void execute() throws FederatedSearchException, IOException {
 		if ( DEBUG_MODE) FederatedSearchLog.l.debug(
 			Thread.currentThread().getName() + " > FederatedFacade.execute : ENTER");
 		
@@ -47,19 +47,19 @@ public class FederatedSource {
 
 	}
 	
-	public void setTerm(HTerm term) {
+	public final void setTerm(HTerm term) {
 		this.term = term;
 	}
 	
-	public void setQueryDetails(QueryPart queryMappings) {
+	public final void setQueryDetails(final QueryPart queryMappings) {
 		this.queryMappings = queryMappings;
 	}
 	
-	public HTerm getTerm() {
+	public final HTerm getTerm() {
 		return this.term;
 	}
 	
-	public QueryPart getQueryDetails() {
+	public final  QueryPart getQueryDetails() {
 		return this.queryMappings;
 	}
 }

@@ -1,6 +1,6 @@
 package com.bizosys.hsearch.federate;
 
-public class FederatedSearchException extends Exception {
+public final class FederatedSearchException extends Exception {
 
 	/**
 	 * 
@@ -11,15 +11,15 @@ public class FederatedSearchException extends Exception {
 		super();
 	}
 
-	public FederatedSearchException(String arg0) {
+	public FederatedSearchException(final String arg0) {
 		super(arg0);
 	}
 
-	public FederatedSearchException(Throwable arg0) {
+	public FederatedSearchException(final Throwable arg0) {
 		super(arg0);
 	}
 
-	public FederatedSearchException(String arg0, Throwable arg1) {
+	public FederatedSearchException(final String arg0, final Throwable arg1) {
 		super(arg0, arg1);
 	}
 

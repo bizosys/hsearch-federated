@@ -16,9 +16,9 @@ import org.apache.lucene.util.Version;
  * Use Lucene Parser to parse the Query
  * @author Abinasha Karana, Bizosys
  */
-public class HQueryParser {
+public final  class HQueryParser {
 
-	public HQuery parse(String query) throws FederatedSearchException {
+	public final HQuery parse(final String query) throws FederatedSearchException {
 		
 		WhitespaceAnalyzer analyzer = new WhitespaceAnalyzer(Version.LUCENE_35);
 
@@ -36,7 +36,7 @@ public class HQueryParser {
 		
 	}
 	
-	private void parseComposites(Query lQuery, HQuery hQuery) throws FederatedSearchException {
+	private final void parseComposites(final Query lQuery, final HQuery hQuery) throws FederatedSearchException {
 
 		if(lQuery instanceof TermQuery)
 		{
@@ -65,7 +65,7 @@ public class HQueryParser {
 		}
 	}
 
-	private void populateTerm(HQuery hQuery, boolean isShould, boolean isMust, Query subQueryL) 
+	private final void populateTerm(final HQuery hQuery, final boolean isShould, final boolean isMust, final Query subQueryL) 
 		throws FederatedSearchException {
 		
 		HTerm hTerm = new HTerm();
