@@ -114,7 +114,6 @@ public abstract class FederatedSearch {
 	}
 	
 	private HQuery hquery = null;
-	private BitSetOrSet finalResult = null;
 	private HQueryCombiner combiner = null;
 	
 	public final void initialize(final String query) 
@@ -123,7 +122,6 @@ public abstract class FederatedSearch {
 			if ( DEBUG_MODE) FederatedSearchLog.l.debug("FederatedFacade.initialize - ENTER > " + query);
 
 			this.hquery = new HQueryParser().parse(query);
-			this.finalResult = new BitSetOrSet();
 			this.combiner = new HQueryCombiner();
 
 			if ( DEBUG_MODE) FederatedSearchLog.l.debug("FederatedFacade.execute initialize - EXIT ");
@@ -178,7 +176,7 @@ public abstract class FederatedSearch {
 				
 				if ( DEBUG_MODE) FederatedSearchLog.l.debug("FederatedFacade.execute Query Populate- COMPLETED ");
 				
-				finalResult.reset();
+				BitSetOrSet finalResult = new BitSetOrSet();
 				combiner.reset();
 				combiner.combine(hquery, finalResult);
 				return finalResult;
