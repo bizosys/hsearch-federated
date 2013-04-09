@@ -114,7 +114,6 @@ public abstract class FederatedSearch {
 	}
 	
 	private HQuery hquery = null;
-	private List<HTerm> terms = null;
 	private BitSetOrSet finalResult = null;
 	private HQueryCombiner combiner = null;
 	
@@ -124,11 +123,6 @@ public abstract class FederatedSearch {
 			if ( DEBUG_MODE) FederatedSearchLog.l.debug("FederatedFacade.initialize - ENTER > " + query);
 
 			this.hquery = new HQueryParser().parse(query);
-			this.terms = new Vector<HTerm>();
-			new HQuery().toTerms(hquery, this.terms);
-			
-			if ( DEBUG_MODE) FederatedSearchLog.l.debug( "Terms:" + this.terms.toString());
-
 			this.finalResult = new BitSetOrSet();
 			this.combiner = new HQueryCombiner();
 
@@ -141,12 +135,16 @@ public abstract class FederatedSearch {
 			
 			if ( DEBUG_MODE) FederatedSearchLog.l.debug("FederatedFacade.execute Main - ENTER ");
 
-			int termsT = (null == this.terms) ? 0 : this.terms.size();
+			List<HTerm> terms = new Vector<HTerm>();
+			int termsT = (null == terms) ? 0 : terms.size();
 			if ( termsT <= 0 ) termsT = 1;
+			new HQuery().toTerms(hquery, terms);
+			if ( DEBUG_MODE) FederatedSearchLog.l.debug( "Terms:" + terms.toString());
+
 			List<FederatedSource> sources = new ArrayList<FederatedSource>(termsT);
 			
 			try {
-				for (HTerm aTerm : this.terms) {
+				for (HTerm aTerm : terms) {
 					aTerm.reset();
 					
 					FederatedSource fs = new FederatedSource(this);
