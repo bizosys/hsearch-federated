@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -91,14 +90,9 @@ public abstract class FederatedSearch {
 				sources.get(0).execute();
 			} else {
 			
-				List<FederatedExecutor> tasks = new Vector<FederatedExecutor>();
-				
-				for (FederatedSource iFederatedSource : sources) {
-					tasks.add(new FederatedExecutor(iFederatedSource));
-				}
 				if ( INFO_MODE )FederatedSearchLog.l.info(
 					Thread.currentThread().getName() + " > Parallel Execution of Sub Queries .. " + sourcesT);
-				es.invokeAll(tasks);
+				es.invokeAll(sources);
 			}
 			
 			if ( DEBUG_MODE) FederatedSearchLog.l.debug("FederatedFacade.execute Query Populate- COMPLETED ");
@@ -117,7 +111,6 @@ public abstract class FederatedSearch {
 	private HQueryCombiner combiner = null;
 	List<HTerm> terms = null;
 	List<FederatedSource> sources = new ArrayList<FederatedSource>();
-	List<FederatedExecutor> tasks = new Vector<FederatedExecutor>();
 	BitSetOrSet finalResult = new BitSetOrSet();
 	
 	public final void initialize(final String query) 
@@ -143,10 +136,8 @@ public abstract class FederatedSearch {
 			
 			if ( DEBUG_MODE) FederatedSearchLog.l.debug("FederatedFacade.execute Main - ENTER ");
 
-			sources.clear();
-			
 			try {
-			
+				sources.clear();
 				for (HTerm aTerm : terms) {
 					FederatedSource fs = new FederatedSource(this);
 					fs.setTerm(aTerm);
@@ -168,13 +159,9 @@ public abstract class FederatedSearch {
 				if (sourcesT == 1) {
 					sources.get(0).execute();
 				} else {
-					tasks.clear();
-					for (FederatedSource iFederatedSource : sources) {
-						tasks.add(new FederatedExecutor(iFederatedSource));
-					}
 					if ( INFO_MODE )FederatedSearchLog.l.info(
 						Thread.currentThread().getName() + " > Parallel Execution of Sub Queries .. " + sourcesT);
-					es.invokeAll(tasks);
+					es.invokeAll(sources);
 				}
 				
 				if ( DEBUG_MODE) FederatedSearchLog.l.debug("FederatedFacade.execute Query Populate- COMPLETED ");

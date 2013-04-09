@@ -3,12 +3,13 @@ package com.bizosys.hsearch.federate;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Callable;
 
 /**
  * For each source it runs inside a thread.
  * @author Abinasha Karana, Bizosys
  */
-public final class FederatedSource {
+public final class FederatedSource implements Callable<Integer> {
 
 	private static boolean DEBUG_MODE = FederatedSearchLog.l.isDebugEnabled();
 	//private static boolean INFO_MODE = FederatedSearchLog.l.isInfoEnabled();
@@ -19,6 +20,12 @@ public final class FederatedSource {
 	
 	public FederatedSource(final FederatedSearch searcher) {
 		this.searcher = searcher;
+	}
+	
+	@Override
+	public final Integer call() throws Exception {
+		this.execute();
+		return 0;
 	}
 	
 	protected final void execute() throws FederatedSearchException, IOException {
