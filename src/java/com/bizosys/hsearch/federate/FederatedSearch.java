@@ -127,7 +127,7 @@ public abstract class FederatedSearch {
 			this.terms = new Vector<HTerm>();
 			new HQuery().toTerms(hquery, this.terms);
 			
-			System.out.println("Terms:" + this.terms.toString());
+			if ( DEBUG_MODE) FederatedSearchLog.l.debug( "Terms:" + this.terms.toString());
 
 			this.finalResult = new BitSetOrSet();
 			this.combiner = new HQueryCombiner();
@@ -169,7 +169,7 @@ public abstract class FederatedSearch {
 				if (sourcesT == 1) {
 					sources.get(0).execute();
 				} else {
-					List<FederatedExecutor> tasks = new ArrayList<FederatedExecutor>();
+					List<FederatedExecutor> tasks = new Vector<FederatedExecutor>();
 					for (FederatedSource iFederatedSource : sources) {
 						tasks.add(new FederatedExecutor(iFederatedSource));
 					}
