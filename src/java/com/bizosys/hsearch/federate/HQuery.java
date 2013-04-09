@@ -18,11 +18,11 @@ public final class HQuery {
 	public List<HTerm> terms = new ArrayList<HTerm>();
 	
 
-	public final void toTerms(final HQuery query, final List<HTerm> terms) {
+	public final void toTerms(final HQuery query, final List<HTerm> allTerms) {
 		for (HQuery subQuery : query.subQueries) {
-			toTerms(subQuery, terms);
+			toTerms(subQuery, allTerms);
 		}
-		terms.addAll(query.terms);
+		allTerms.addAll(query.terms);
 	}
 	
 	public final String toString(final String level) {
