@@ -115,6 +115,10 @@ public abstract class FederatedSearch {
 	
 	private HQuery hquery = null;
 	private HQueryCombiner combiner = null;
+	List<HTerm> terms = null;
+	List<FederatedSource> sources = new ArrayList<FederatedSource>();
+	List<FederatedExecutor> tasks = new Vector<FederatedExecutor>();
+	BitSetOrSet finalResult = new BitSetOrSet();
 	
 	public final void initialize(final String query) 
 			throws FederatedSearchException, IOException, InterruptedException {
@@ -123,7 +127,13 @@ public abstract class FederatedSearch {
 
 			this.hquery = new HQueryParser().parse(query);
 			this.combiner = new HQueryCombiner();
+			this.terms = new ArrayList<HTerm>();
 
+			int termsT = (null == terms) ? 0 : terms.size();
+			if ( termsT <= 0 ) termsT = 1;
+			new HQuery().toTerms(hquery, terms);
+			if ( DEBUG_MODE) FederatedSearchLog.l.debug( "Terms:" + terms.toString());
+			
 			if ( DEBUG_MODE) FederatedSearchLog.l.debug("FederatedFacade.execute initialize - EXIT ");
 		}
 
@@ -133,18 +143,11 @@ public abstract class FederatedSearch {
 			
 			if ( DEBUG_MODE) FederatedSearchLog.l.debug("FederatedFacade.execute Main - ENTER ");
 
-			List<HTerm> terms = new Vector<HTerm>();
-			int termsT = (null == terms) ? 0 : terms.size();
-			if ( termsT <= 0 ) termsT = 1;
-			new HQuery().toTerms(hquery, terms);
-			if ( DEBUG_MODE) FederatedSearchLog.l.debug( "Terms:" + terms.toString());
-
-			List<FederatedSource> sources = new ArrayList<FederatedSource>(termsT);
+			sources.clear();
 			
 			try {
+			
 				for (HTerm aTerm : terms) {
-					aTerm.reset();
-					
 					FederatedSource fs = new FederatedSource(this);
 					fs.setTerm(aTerm);
 					
@@ -165,7 +168,7 @@ public abstract class FederatedSearch {
 				if (sourcesT == 1) {
 					sources.get(0).execute();
 				} else {
-					List<FederatedExecutor> tasks = new Vector<FederatedExecutor>();
+					tasks.clear();
 					for (FederatedSource iFederatedSource : sources) {
 						tasks.add(new FederatedExecutor(iFederatedSource));
 					}
@@ -176,8 +179,8 @@ public abstract class FederatedSearch {
 				
 				if ( DEBUG_MODE) FederatedSearchLog.l.debug("FederatedFacade.execute Query Populate- COMPLETED ");
 				
-				BitSetOrSet finalResult = new BitSetOrSet();
 				combiner.reset();
+				finalResult.reset();
 				combiner.combine(hquery, finalResult);
 				return finalResult;
 				
