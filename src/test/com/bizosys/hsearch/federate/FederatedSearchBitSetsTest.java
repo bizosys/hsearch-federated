@@ -44,7 +44,7 @@ public class FederatedSearchBitSetsTest extends TestCase {
 	        
 		} else if  ( modes[2].equals(mode) ) {
 			t.setUp();
-			t.testAndWithManyMatching();
+			t.testAndWithNullMatching();
 			t.tearDown();
 		}
 	}
@@ -56,6 +56,15 @@ public class FederatedSearchBitSetsTest extends TestCase {
 	@Override
 	protected void tearDown() throws Exception {
 	}
+	
+	public void testAndWithNullMatching() throws Exception {
+		FederatedSearch ff = createFederatedSearch(); 
+		Map<String, QueryPart> queryDetails = new HashMap<String, QueryPart>();
+		
+		String query = "(q1 AND q6)";
+		BitSetOrSet q1q2Result = ff.execute(query, queryDetails);
+		assertEquals(0, q1q2Result.getDocumentSequences().cardinality());
+	}	
 	
 	public void testAndWithManyMatching() throws Exception {
 		FederatedSearch ff = createFederatedSearch(); 
@@ -238,11 +247,16 @@ public class FederatedSearchBitSetsTest extends TestCase {
 					for ( int i=200; i<300; i++) bits.set(i);
 				} else if ( queryId.equals("q5")) {
 					for ( int i=1; i<5000000; i++) bits.set(i);
+				} 
+				
+				if ( queryId.equals("q6")) {
+					rows.setDocumentSequences(null);
+				} else {
+					rows.setDocumentSequences(bits);
 				}
 				
-				rows.setDocumentSequences(bits);
-				
 				long e = System.currentTimeMillis();
+				System.out.println("Null docment sequences" + rows.getDocumentSequences().size());
 				System.out.println("Rows :" + rows.getDocumentSequences().size() + " in ms " + (e-s));
 				return rows;
 			}

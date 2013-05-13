@@ -164,7 +164,7 @@ public abstract class FederatedSearch {
 					es.invokeAll(sources);
 				}
 				
-				if ( DEBUG_MODE) FederatedSearchLog.l.debug("FederatedFacade.execute Query Populate- COMPLETED ");
+				if ( DEBUG_MODE) FederatedSearchLog.l.debug("FederatedSearch.execute Query Populate- COMPLETED ");
 				
 				combiner.reset();
 				finalResult.reset();
@@ -172,7 +172,7 @@ public abstract class FederatedSearch {
 				return finalResult;
 				
 			} finally {
-				if ( DEBUG_MODE) FederatedSearchLog.l.debug("FederatedFacade.execute Main - EXIT ");
+				if ( DEBUG_MODE) FederatedSearchLog.l.debug("FederatedSearch.execute Main - " + finalResult.size() + " EXIT ");
 			}
 			
 		}	

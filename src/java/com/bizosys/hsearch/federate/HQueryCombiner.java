@@ -27,21 +27,22 @@ public final class HQueryCombiner {
 				if ( ! term.isMust ) continue;
 
 				HResult source = term.getResult();
-				if ( null == source) continue;
+				if ( null == source) {
+					isFirst = false;
+					destination.clear();
+					return destination;
+				}
 				
 				if ( isFirst ) {
 				
 					if ( DEBUG_MODE ) FederatedSearchLog.l.debug("First Must :" + term.text);
-
 					destination.or(source.getRowIds());
 					isFirst = false;
 
 				} else {
-				
 					destination.and(source.getRowIds());
-
-					if ( DEBUG_MODE ) FederatedSearchLog.l.debug(
-						Thread.currentThread().getName() + "Subsequnt Must :" + term.text);
+					if ( DEBUG_MODE ) FederatedSearchLog.l.debug("Subsequnt Must :" + term.text + "\n" + 
+							"source:" + source + "\tdestination\t" + destination);
 				}
 			}
 			
