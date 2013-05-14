@@ -103,7 +103,7 @@ public final class BitSetOrSet {
 			if ( null == this.bitsets) this.bitsets = new BitSet(); 
 			not (this.bitsets,source.bitsets);
 		}
-		else {
+		else if ( null != source.sets) {
 			if ( null == this.sets) this.sets = new HashSet<Object>(); 
 			not (this.sets,source.sets);
 		}
@@ -165,7 +165,7 @@ public final class BitSetOrSet {
 	
 	private static final void or (final Set<Object> destination, final Set<Object> source) throws FederatedSearchException {
 		if ( null == destination) {
-			throw new FederatedSearchException("Destination set is null");
+			source.clear();
 		}
 		
 		int sourceT = ( null == source) ? 0 : source.size();
@@ -180,8 +180,13 @@ public final class BitSetOrSet {
 
 	private static final void not (final Set<Object> destination, final Set<Object> source) throws FederatedSearchException {
 		if ( null == destination) {
-			throw new FederatedSearchException("Destination set is null");
+			source.clear();
 		}
+		if ( null == source) {
+			destination.clear();
+			return;
+		}
+
 		destination.removeAll(source);
 	}
 		
