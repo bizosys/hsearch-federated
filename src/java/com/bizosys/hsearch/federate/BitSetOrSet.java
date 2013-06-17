@@ -7,7 +7,8 @@ import java.util.List;
 import java.util.Set;
 
 public final class BitSetOrSet {
-	
+
+	public boolean isVirgin = true;
 	private static boolean DEBUG_MODE = FederatedSearchLog.l.isDebugEnabled();
 	private static boolean INFO_MODE = FederatedSearchLog.l.isInfoEnabled();
 

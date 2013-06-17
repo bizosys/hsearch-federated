@@ -37,9 +37,16 @@ public final class HQuery {
 			sb.append(level).append(term.type).append(":").append( term.text ).append(":Must-");
 			sb.append(term.isMust).append(":Should-").append( term.isShould).append(":Fuzzy-");
 			sb.append(term.isFuzzy).append(":").append( term.boost);
+			sb.append("\n");
 		}
 		sb.append(level).append("**********");
 		return sb.toString();
 	}
+	
+	@Override
+	public final String toString() {
+		return this.toString("Q"); 
+	}
+	
 		
 }

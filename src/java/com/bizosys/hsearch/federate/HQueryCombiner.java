@@ -10,15 +10,22 @@ public final class HQueryCombiner {
 	private static boolean DEBUG_MODE = FederatedSearchLog.l.isDebugEnabled();
 	//private static boolean INFO_MODE = FederatedSearchLog.l.isInfoEnabled();
 	
-	boolean isFirst = true;
-	
 	public final  BitSetOrSet combine(final HQuery query, final BitSetOrSet destination) throws FederatedSearchException  {
 		
 		try {
-			
 			for (HQuery subQuery : query.subQueries) {
 				if ( DEBUG_MODE ) FederatedSearchLog.l.debug("Launching a Sub Query");
-				combine(subQuery, destination);
+				BitSetOrSet output = combine(subQuery, new BitSetOrSet());
+				if ( subQuery.isMust ) {
+					if ( destination.isVirgin) destination.or(output);
+					else destination.and(output);
+				} else if ( subQuery.isShould ) {
+					destination.or(output);
+				} else {
+					destination.not(output);
+				}
+				output.clear();
+				destination.isVirgin = false;
 			}
 			
 			//AND Terms
@@ -28,16 +35,16 @@ public final class HQueryCombiner {
 
 				HResult source = term.getResult();
 				if ( null == source) {
-					isFirst = false;
+					destination.isVirgin = false;
 					destination.clear();
 					return destination;
 				}
 				
-				if ( isFirst ) {
+				if ( destination.isVirgin ) {
 				
 					if ( DEBUG_MODE ) FederatedSearchLog.l.debug("First Must :" + term.text);
 					destination.or(source.getRowIds());
-					isFirst = false;
+					destination.isVirgin = false;
 
 				} else {
 					destination.and(source.getRowIds());
@@ -54,7 +61,7 @@ public final class HQueryCombiner {
 				HResult source = term.getResult();
 				if ( null == source) continue;
 				
-				if ( isFirst ) isFirst = false;
+				if ( destination.isVirgin ) destination.isVirgin = false;
 				
 				if ( DEBUG_MODE ) FederatedSearchLog.l.debug(
 					Thread.currentThread().getName() + " > OR :" + term.text);
@@ -68,12 +75,9 @@ public final class HQueryCombiner {
 				if ( term.isShould ) continue;
 				if ( term.isMust) continue;
 
-				if ( isFirst ) {
-				
+				if ( destination.isVirgin ) {
 					throw new FederatedSearchException("Only must not query not allowed");
-				
 				} else {
-					
 					HResult source = term.getResult();
 					if ( null == source) continue;
 
@@ -93,8 +97,5 @@ public final class HQueryCombiner {
 	}
 	
 	public final void reset() {
-		this.isFirst = true;
 	}
-	
-
 }

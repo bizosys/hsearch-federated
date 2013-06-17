@@ -45,7 +45,7 @@ public class FederatedSearchSetsIntegerTest extends TestCase {
 	        
 		} else if  ( modes[2].equals(mode) ) {
 			t.setUp();
-			t.testAndWithManyMatching();
+			t.testNonOverallapingOrWithAnd();
 			t.tearDown();
 		}
 	}
@@ -192,7 +192,19 @@ public class FederatedSearchSetsIntegerTest extends TestCase {
 			assertEquals(100, manyResult.getDocumentIds().size());
 		}
 		
-	}	
+	}
+	
+	public void testNonOverallapingOrWithAnd() throws Exception{
+		FederatedSearch ff = createFederatedSearch();
+		Map<String, QueryPart> queryDetails = new HashMap<String, QueryPart>();
+		
+		 // q1 = 0 - 100 , q2 = 75 - 200, q3 = 0
+		String query = "(q1 AND q3) OR (q1 AND q2)";
+
+		BitSetOrSet manyResult = ff.execute(query, queryDetails);
+
+		assertEquals("[0, 76, 77, 78, 79, 75, 85, 84, 87, 86, 81, 80, 83, 82, 93, 92, 95, 94, 89, 88, 91, 90, 98, 99, 96, 97]", manyResult.getDocumentIds().toString() );
+	}
 	
 	public void testPerformance() throws Exception {
 		FederatedSearch ff = createFederatedSearch(); 
