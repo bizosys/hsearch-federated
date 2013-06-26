@@ -32,7 +32,7 @@ import com.oneline.ferrari.TestAll;
 
 public class FederatedSearchBitSetsTest extends TestCase {
 	public static String[] modes = new String[] { "all", "random", "method"};
-	public static String mode = modes[1];  
+	public static String mode = modes[2];  
 	
 	public static void main(String[] args) throws Exception {
 		FederatedSearchBitSetsTest t = new FederatedSearchBitSetsTest();
@@ -44,7 +44,7 @@ public class FederatedSearchBitSetsTest extends TestCase {
 	        
 		} else if  ( modes[2].equals(mode) ) {
 			t.setUp();
-			t.testAndWithNullMatching();
+			t.testAndWithManyMatching();
 			t.tearDown();
 		}
 	}

@@ -13,20 +13,40 @@ public final class HQueryCombiner {
 	public final  BitSetOrSet combine(final HQuery query, final BitSetOrSet destination) throws FederatedSearchException  {
 		
 		try {
+			/**
+			 * Imaging we are iterating through directories
+			 */
 			for (HQuery subQuery : query.subQueries) {
-				if ( DEBUG_MODE ) FederatedSearchLog.l.debug("Launching a Sub Query");
-				BitSetOrSet output = combine(subQuery, new BitSetOrSet());
+				/**
+				 * Just execute the subquery.
+				 */
+				BitSetOrSet subQueryOutput = new BitSetOrSet();
+				combine(subQuery, subQueryOutput); 
+				if ( DEBUG_MODE ) FederatedSearchLog.l.debug("Launching a Sub Query: EXIT " + subQuery.toString() + "\t" + subQueryOutput.toString());
+				
 				if ( subQuery.isMust ) {
-					if ( destination.isVirgin) destination.or(output);
-					else destination.and(output);
+					if ( DEBUG_MODE ) FederatedSearchLog.l.debug("Sub Query Must: " + destination.isVirgin + "\tDestination:\t" + destination.toString() + "\tOutput\t" + subQueryOutput.toString() );
+					if ( destination.isVirgin ) {
+						destination.or(subQueryOutput);
+					} else {
+						destination.and(subQueryOutput);
+					}
 				} else if ( subQuery.isShould ) {
-					destination.or(output);
+					if ( DEBUG_MODE ) FederatedSearchLog.l.debug("Sub Query Should: " + destination.isVirgin + "\tDestination:\t" + destination.toString() + "\tOutput\t" + subQueryOutput.toString() );
+					destination.or(subQueryOutput);
 				} else {
-					destination.not(output);
+					if ( DEBUG_MODE ) FederatedSearchLog.l.debug("Sub Query Not: " + destination.isVirgin + "\tDestination:\t" + destination.toString() + "\tOutput\t" + subQueryOutput.toString() );
+					destination.not(subQueryOutput);
 				}
-				output.clear();
+				
+				subQueryOutput.clear();
 				destination.isVirgin = false;
+				if ( DEBUG_MODE ) FederatedSearchLog.l.debug("Sub Query Updated Destination: " + destination.toString()  );
 			}
+
+			/**
+			 * Imaging we are iterating files of this directories
+			 */
 			
 			//AND Terms
 			for (HTerm term : query.terms) {
@@ -34,6 +54,7 @@ public final class HQueryCombiner {
 				if ( ! term.isMust ) continue;
 
 				HResult source = term.getResult();
+				
 				if ( null == source) {
 					destination.isVirgin = false;
 					destination.clear();
@@ -42,13 +63,13 @@ public final class HQueryCombiner {
 				
 				if ( destination.isVirgin ) {
 				
-					if ( DEBUG_MODE ) FederatedSearchLog.l.debug("First Must :" + term.text);
+					if ( DEBUG_MODE ) FederatedSearchLog.l.debug("First Must :" + term.text + "\tsource:" + source);
 					destination.or(source.getRowIds());
 					destination.isVirgin = false;
 
 				} else {
 					destination.and(source.getRowIds());
-					if ( DEBUG_MODE ) FederatedSearchLog.l.debug("Subsequnt Must :" + term.text + "\n" + 
+					if ( DEBUG_MODE ) FederatedSearchLog.l.debug("Subsequent Must :" + term.text + "\n" + 
 							"source:" + source + "\tdestination\t" + destination);
 				}
 			}
