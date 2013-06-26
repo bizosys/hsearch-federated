@@ -61,6 +61,7 @@ public final class BitSetOrSet {
 	public final void reset() {
 		if ( null != bitsets ) bitsets.clear();
 		if ( null != sets ) sets.clear();
+		this.isVirgin = true;
 	}
 
 	public final void and (final BitSetOrSet source) throws FederatedSearchException {
