@@ -10,6 +10,7 @@ public final class BitSetOrSet {
 
 	public boolean isVirgin = true;
 	private static boolean DEBUG_MODE = FederatedSearchLog.l.isDebugEnabled();
+	private static boolean TRACE_MODE = FederatedSearchLog.l.isTraceEnabled();
 	private static boolean INFO_MODE = FederatedSearchLog.l.isInfoEnabled();
 
 	private BitSet bitsets = null;
@@ -74,7 +75,7 @@ public final class BitSetOrSet {
 		}
 		
 		if ( DEBUG_MODE ) {
-			FederatedSearchLog.l.debug("Bits:Sets (AND) = " + source.toString() );
+			FederatedSearchLog.l.trace("Bits:Sets (AND) = " + source.toString() );
 		}
 		
 		if ( null != source.sets) {
