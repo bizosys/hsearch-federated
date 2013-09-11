@@ -74,8 +74,9 @@ public final class BitSetOrSet {
 		}
 		
 		if ( DEBUG_MODE ) {
-			FederatedSearchLog.l.debug("\n\n" + source.bitsets + "\t" + source.sets + "\n\n");
+			FederatedSearchLog.l.debug("Bits:Sets (AND) = " + source.toString() );
 		}
+		
 		if ( null != source.sets) {
 			if ( null == this.sets) this.sets = new HashSet<Object>(); 
 			and (this.sets,source.sets);
