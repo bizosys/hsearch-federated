@@ -23,7 +23,8 @@ public final class HTerm {
 	
 	public final HResult getResult() {
 		if ( DEBUG_MODE ) FederatedSearchLog.l.debug( 
-				"Thread -" + Thread.currentThread().getName() + " HTerm > getResult null : " + ( null == result));
+				"Thread -" + Thread.currentThread().getName() + 
+				" HTerm > getResult null : " + ( null == result));
 		return result;
 	}
 	

@@ -25,8 +25,8 @@ public final class HResult {
 	
 	@Override
 	public final String toString() {
-		if ( null == foundIds)	return "null";
-		return foundIds.toString();
+		int totalIds = ( null == foundIds) ? 0 : foundIds.size();
+		return "HResult=" + totalIds;
 	}
 
 }
