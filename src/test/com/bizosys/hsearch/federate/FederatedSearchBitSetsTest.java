@@ -44,7 +44,7 @@ public class FederatedSearchBitSetsTest extends TestCase {
 	        
 		} else if  ( modes[2].equals(mode) ) {
 			t.setUp();
-			t.testAndWithManyMatching();
+			t.testSubqueries();
 			t.tearDown();
 		}
 	}
@@ -56,6 +56,14 @@ public class FederatedSearchBitSetsTest extends TestCase {
 	@Override
 	protected void tearDown() throws Exception {
 	}
+	
+	public void testSubqueries() throws Exception {
+		FederatedSearch ff = createFederatedSearch(); 
+		Map<String, QueryPart> queryDetails = new HashMap<String, QueryPart>();
+		
+		String query = "((q0 AND q1) OR (q2 AND q3))";
+		BitSetOrSet q1q2Result = ff.execute(query, queryDetails);
+	}		
 	
 	public void testAndWithNullMatching() throws Exception {
 		FederatedSearch ff = createFederatedSearch(); 
@@ -237,7 +245,7 @@ public class FederatedSearchBitSetsTest extends TestCase {
 				}
 				
 				BitSet bits = new BitSet();
-				if ( queryId.equals("q1")) {
+				if ( queryId.equals("q1") || queryId.equals("q0")) {
 					for ( int i=0; i<100; i++) bits.set(i);
 				} else if ( queryId.equals("q2")) {
 					for ( int i=75; i<200; i++) bits.set(i);

@@ -214,7 +214,8 @@ public final class BitSetOrSet {
 		destination.and(source);
 		
 		if ( DEBUG_MODE ) {
-			FederatedSearchLog.l.info("BitSetOrSet: and result " + destination.toString());
+			int size = ( null == destination) ? 0 : destination.size();
+			FederatedSearchLog.l.info("BitSetOrSet: and result " + size);
 		}
 		
 	}
@@ -229,7 +230,8 @@ public final class BitSetOrSet {
 		destination.or(source);
 		
 		if ( DEBUG_MODE ) {
-			FederatedSearchLog.l.info("BitSetOrSet: or result " + destination.toString());
+			int size = ( null == destination) ? 0 : destination.size();
+			FederatedSearchLog.l.info("BitSetOrSet: or result " + size);
 		}
 		
 	}
@@ -245,7 +247,8 @@ public final class BitSetOrSet {
 		destination.andNot(source);
 		
 		if ( DEBUG_MODE ) {
-			FederatedSearchLog.l.info("BitSetOrSet: andNot result " + destination.toString());
+			int size = ( null == destination) ? 0 : destination.size();
+			FederatedSearchLog.l.info("BitSetOrSet: andNot result " + size);
 		}
 		
 	}	

@@ -22,26 +22,48 @@ public final class HQueryCombiner {
 				 */
 				BitSetOrSet subQueryOutput = new BitSetOrSet();
 				combine(subQuery, subQueryOutput); 
-				if ( DEBUG_MODE ) FederatedSearchLog.l.debug("Launching a Sub Query: EXIT " + subQuery.toString() + "\t" + subQueryOutput.toString());
+				if ( DEBUG_MODE ) {
+					int subQuerySize = ( null == subQueryOutput) ? 0 : subQueryOutput.size();
+					FederatedSearchLog.l.debug("Launching a Sub Query: EXIT " + 
+							subQuery.toString() + "\t" + subQuerySize);
+				}
 				
 				if ( subQuery.isMust ) {
-					if ( DEBUG_MODE ) FederatedSearchLog.l.debug("Sub Query Must: " + destination.isVirgin + "\tDestination:\t" + destination.toString() + "\tOutput\t" + subQueryOutput.toString() );
+					if ( DEBUG_MODE ) {
+						int destSize = ( null == destination) ? 0 : destination.size();
+						int subQuerySize = ( null == subQueryOutput) ? 0 : subQueryOutput.size();
+						FederatedSearchLog.l.debug("Sub Query Must: " + destination.isVirgin +
+							"\tDestination:\t" + destSize + "\tOutput\t" + subQuerySize );
+					}
 					if ( destination.isVirgin ) {
 						destination.or(subQueryOutput);
 					} else {
 						destination.and(subQueryOutput);
 					}
 				} else if ( subQuery.isShould ) {
-					if ( DEBUG_MODE ) FederatedSearchLog.l.debug("Sub Query Should: " + destination.isVirgin + "\tDestination:\t" + destination.toString() + "\tOutput\t" + subQueryOutput.toString() );
+					if ( DEBUG_MODE ) {
+						int destSize = ( null == destination) ? 0 : destination.size();
+						int subQuerySize = ( null == subQueryOutput) ? 0 : subQueryOutput.size();
+						FederatedSearchLog.l.debug("Sub Query Should: " + destination.isVirgin +
+							"\tDestination:\t" + destSize + "\tOutput\t" + subQuerySize );
+					}
 					destination.or(subQueryOutput);
 				} else {
-					if ( DEBUG_MODE ) FederatedSearchLog.l.debug("Sub Query Not: " + destination.isVirgin + "\tDestination:\t" + destination.toString() + "\tOutput\t" + subQueryOutput.toString() );
+					if ( DEBUG_MODE ) {
+						int destSize = ( null == destination) ? 0 : destination.size();
+						int subQuerySize = ( null == subQueryOutput) ? 0 : subQueryOutput.size();
+						FederatedSearchLog.l.debug("Sub Query Not: " + destination.isVirgin + "\tDestination:\t" + 
+							destSize + "\tOutput\t" + subQuerySize );
+					}
 					destination.not(subQueryOutput);
 				}
 				
 				subQueryOutput.clear();
 				destination.isVirgin = false;
-				if ( DEBUG_MODE ) FederatedSearchLog.l.debug("Sub Query Updated Destination: " + destination.toString()  );
+				if ( DEBUG_MODE ) {
+					int destSize = ( null == destination) ? 0 : destination.size();
+					FederatedSearchLog.l.debug("Sub Query Updated Destination: " + destSize  );
+				}
 			}
 
 			/**
@@ -114,7 +136,6 @@ public final class HQueryCombiner {
 			FederatedSearchLog.l.error(query.toString(), e);
 			throw new FederatedSearchException(e);
 		}
-		
 	}
 	
 	public final void reset() {
