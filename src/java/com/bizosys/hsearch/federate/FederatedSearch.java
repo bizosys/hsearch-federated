@@ -38,7 +38,13 @@ public abstract class FederatedSearch {
 		this (-1);
 	}
 	
-	public FederatedSearch(final int fixedThreads) {
+	public static ExecutorService getExecutorService() {
+		if ( null != es ) return es;
+		init(-1);
+		return es;
+	}
+	
+	private static void init(final int fixedThreads) {
 		if ( null == es) {
 			synchronized ("FederatedFacade") {
 				if ( null == es) {
@@ -52,7 +58,12 @@ public abstract class FederatedSearch {
 			}
 		}
 	}
+
 	
+	public FederatedSearch(final int fixedThreads) {
+		init(fixedThreads);
+	}
+
 	public final BitSetOrSet execute(final String query, final Map<String, QueryPart> queryArgs) 
 		throws FederatedSearchException, IOException, InterruptedException {
 		
