@@ -259,4 +259,9 @@ public final class BitSetOrSet {
 	 * BITSET CALCULATION ENDS
 	 *************************************************************/
 	
+	public final boolean contains(final int key) {
+		if ( null != this.sets) return this.sets.contains(key);
+		else return this.bitsets.get(key);
+	}
+	
 }

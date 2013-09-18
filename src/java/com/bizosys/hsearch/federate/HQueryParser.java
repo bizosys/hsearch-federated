@@ -17,7 +17,7 @@ import org.apache.lucene.util.Version;
  * @author Abinasha Karana, Bizosys
  */
 public final  class HQueryParser {
-
+	
 	public final HQuery parse(final String query) throws FederatedSearchException {
 		
 		WhitespaceAnalyzer analyzer = new WhitespaceAnalyzer(Version.LUCENE_35);
