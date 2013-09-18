@@ -261,7 +261,8 @@ public final class BitSetOrSet {
 	
 	public final boolean contains(final int key) {
 		if ( null != this.sets) return this.sets.contains(key);
-		else return this.bitsets.get(key);
+		else if ( null != this.bitsets ) return this.bitsets.get(key);
+		else return false;
 	}
 	
 }
