@@ -244,7 +244,7 @@ public class FederatedSearchBitSetsTest extends TestCase {
 					}
 				}
 				
-				BitSet bits = new BitSet();
+				BitSetWrapper bits = new BitSetWrapper();
 				if ( queryId.equals("q1") || queryId.equals("q0")) {
 					for ( int i=0; i<100; i++) bits.set(i);
 				} else if ( queryId.equals("q2")) {
