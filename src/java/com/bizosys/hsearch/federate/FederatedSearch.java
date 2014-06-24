@@ -34,6 +34,7 @@ public abstract class FederatedSearch {
 	
 	private static ExecutorService es = null;
 	
+	private boolean keepProcessingTrace = false;
 	public FederatedSearch() {
 		this (-1);
 	}
@@ -62,6 +63,10 @@ public abstract class FederatedSearch {
 	
 	public FederatedSearch(final int fixedThreads) {
 		init(fixedThreads);
+	}
+	
+	public void setKeepProcessingTracing(boolean isSet) {
+		this.keepProcessingTrace = isSet;
 	}
 
 	public final BitSetOrSet execute(final String query, final Map<String, QueryPart> queryArgs) 
@@ -109,7 +114,19 @@ public abstract class FederatedSearch {
 			if ( DEBUG_MODE) FederatedSearchLog.l.debug("FederatedFacade.execute Query Populate- COMPLETED ");
 			
 			BitSetOrSet finalResult = new BitSetOrSet();
-			new HQueryCombiner().combine(hquery, finalResult);
+			new HQueryCombiner().combine(hquery, finalResult, keepProcessingTrace);
+			
+			if ( keepProcessingTrace ) {
+				finalResult.orQueryWithFoundIds.putAll(finalResult.orQueryWithFoundIdsTemp);
+				finalResult.orQueryWithFoundIdsTemp.clear();
+
+				if ( DEBUG_MODE) {
+					int size = ( null == finalResult.orQueryWithFoundIds) ? 0 : finalResult.orQueryWithFoundIds.size();
+					FederatedSearchLog.l.debug("FederatedFacade.execute finalResult.orQueryWithFoundIds.size() : " + size);
+				}
+			}
+			
+			
 			return finalResult;
 			
 		} finally {
@@ -131,6 +148,7 @@ public abstract class FederatedSearch {
 
 			this.hquery = new HQueryParser().parse(query);
 			this.combiner = new HQueryCombiner();
+			
 			this.terms = new ArrayList<HTerm>();
 
 			int termsT = (null == terms) ? 0 : terms.size();
@@ -179,7 +197,7 @@ public abstract class FederatedSearch {
 				
 				combiner.reset();
 				finalResult.reset();
-				combiner.combine(hquery, finalResult);
+				combiner.combine(hquery, finalResult,keepProcessingTrace);
 				return finalResult;
 				
 			} finally {

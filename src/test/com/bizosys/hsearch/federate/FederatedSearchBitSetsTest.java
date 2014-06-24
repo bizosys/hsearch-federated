@@ -44,7 +44,7 @@ public class FederatedSearchBitSetsTest extends TestCase {
 	        
 		} else if  ( modes[2].equals(mode) ) {
 			t.setUp();
-			t.testSubqueries();
+			t.testTrace();
 			t.tearDown();
 		}
 	}
@@ -227,6 +227,22 @@ public class FederatedSearchBitSetsTest extends TestCase {
 		
 	}
 	
+	public void testTrace() throws Exception {
+		FederatedSearch ff = createFederatedSearch();
+		ff.setKeepProcessingTracing(true);
+		Map<String, QueryPart> queryDetails = new HashMap<String, QueryPart>();
+		
+		String query = "(q1 OR q2) AND (q3 OR q4) OR ( q5 OR q7) OR q8";
+		long s = System.currentTimeMillis();
+		BitSetOrSet manyResult = ff.execute(query, queryDetails);
+		
+		System.out.println("####### manyResult " + manyResult .orQueryWithFoundIds.keySet().toString());
+		
+		long e = System.currentTimeMillis();
+		System.out.println(manyResult.getDocumentSequences().size() + " in ms " + (e-s));
+		
+	}
+
 	private FederatedSearch createFederatedSearch() {
 		FederatedSearch ff = new FederatedSearch(2) {
 

@@ -1,8 +1,10 @@
 package com.bizosys.hsearch.federate;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public final class BitSetOrSet {
@@ -15,14 +17,18 @@ public final class BitSetOrSet {
 	@SuppressWarnings("rawtypes")
 	private Set sets = null;
 	
+	/**
+	 * This contains all parts which have been added to create this.
+	 */
+	public Map<String, BitSetOrSet> orQueryWithFoundIds = new HashMap<String, BitSetOrSet>(); 
+	public Map<String, BitSetOrSet> orQueryWithFoundIdsTemp = new HashMap<String, BitSetOrSet>(); 
+	
 	public final int size() {
 		
 		if ( null != sets) return sets.size();
 
 		if ( null != bitsets) {
-			int size = 0;
-			for (int i = bitsets.nextSetBit(0); i >= 0; i = bitsets.nextSetBit(i+1)) size++;
-			return size;
+			return bitsets.cardinality();
 		}
 		
 		return 0;

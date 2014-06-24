@@ -50,8 +50,12 @@ public final class FederatedSource implements Callable<Integer> {
 		}
 		
 		term.setResult(result);
-		if ( DEBUG_MODE) FederatedSearchLog.l.debug(Thread.currentThread().getName() + " > FederatedFacade.execute : EXIT");
-
+		
+		if ( DEBUG_MODE) FederatedSearchLog.l.debug(
+			Thread.currentThread().getName() + " > " + 
+			result.getRowIds().orQueryWithFoundIds.toString() + 
+			"  > FederatedFacade.execute : EXIT");
+		
 	}
 	
 	public final void setTerm(HTerm term) {

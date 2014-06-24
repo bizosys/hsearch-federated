@@ -1,19 +1,17 @@
 import java.util.BitSet;
 
-import org.apache.lucene.util.OpenBitSet;
-
 /**
  * A while back a popular article hit Hacker News. Written by the guys over at
  * Spool, it contained a slick methodology for storing metrics such as user
  * logins per day, song plays by user, etc using using Redis BitSets. How about
  * a basic example. When a user logs in, set a bit in a bitset at the location
- * of that user’s ID number. If you have a bitset allocated for each day, you
+ * of that userï¿½s ID number. If you have a bitset allocated for each day, you
  * can tell for any given day how many users logged in by looking at the
  * cardinality of the bitset. Want to see if a particular user logged in on a
- * particular day? Just check the location in the bitset for that user’s ID for
+ * particular day? Just check the location in the bitset for that userï¿½s ID for
  * the day in question for a 1 value. You can also perform more advanced
  * logging, taking the union of multiple sets, or the disunion, to determine
- * various statistics. The theory behind it is simple and sound. It’s faster
+ * various statistics. The theory behind it is simple and sound. Itï¿½s faster
  * than hitting an RDBMS for values that are binary in nature, and the ability
  * to apply basic set theory to your bitsets to analyze your metrics is quite
  * powerful.

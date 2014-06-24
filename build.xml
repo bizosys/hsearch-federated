@@ -20,7 +20,7 @@
 * limitations under the License.
 -->
 
-<project name="hsearch-federated" basedir=".">
+<project name="hsearch-federated-old" basedir=".">
 
 	<property name="currdir" value="${basedir}" />
 	<property file="${currdir}/build.properties" />
@@ -29,12 +29,20 @@
 		<format property="build.time" pattern="dd MMM yyyy hh:mm aa"/>
 	</tstamp>
 	
+	<target name="compatibility">
+		<copy verbose="true" overwrite="true" file="${compatibility.dir}/BitSetWrapper.java.${javac.version}" 
+	  	tofile="${src.dir}/com/bizosys/hsearch/federate/BitSetWrapper.java" />
+	</target>
+	
 	<!-- the normal classpath -->
 	<path id="classpath">
 		<pathelement location="${build.classes}" />
-		<fileset dir="${lib.dir}">
+		<fileset dir="${commonlib.dir}">
 			<include name="*.jar" />
-		</fileset>
+		</fileset>	
+		<fileset dir="${hadooplib.dir}_${hadoolib.version}">
+			<include name="*.jar" />
+		</fileset>	
 	</path>
 
 	<!-- ====================================================== -->
@@ -67,16 +75,20 @@
 	<target name="jar-sources">
 		<jar jarfile="src-${name}.jar" basedir="${src.dir}">
 			<manifest>
-				<attribute name="Created-By" value="${company}(${build.time})"/>
-				<attribute name="Version" value="${version}"/>
+			    <attribute name="Product-Name" value="${name}"/>
+			    <attribute name="Version" value="${version}"/>
+			    <attribute name="Java-Version" value="${java.version}"/>
+			   	<attribute name="Created-By" value="${company}(${build.time})"/>
 				<attribute name="BuildDate" value="${build.time}"/>
 			</manifest>			
 		</jar>
 		
 		<jar jarfile="releases/src-${name}_${version}.jar" basedir="${src.dir}">
 			<manifest>
-				<attribute name="Created-By" value="${company}(${build.time})"/>
-				<attribute name="Version" value="${version}"/>
+			    <attribute name="Product-Name" value="${name}"/>
+			    <attribute name="Version" value="${version}"/>
+			    <attribute name="Java-Version" value="${java.version}"/>
+			   	<attribute name="Created-By" value="${company}(${build.time})"/>
 				<attribute name="BuildDate" value="${build.time}"/>
 			</manifest>			
 		</jar>
@@ -87,15 +99,18 @@
 	<!-- ================================================================== -->
 	<!--                                                                    -->
 	<!-- ================================================================== -->
-	<target name="jar" depends="compile-core, jar-sources">
+	<target name="jar" depends="compatibility, compile-core, jar-sources">
 		<jar jarfile="${name}.jar" basedir="${build.classes}">
 			<manifest>
-				<attribute name="Created-By" value="${company}(${build.time})"/>
-				<attribute name="Version" value="${version}"/>
+			    <attribute name="Product-Name" value="${name}"/>
+			    <attribute name="Version" value="${version}"/>
+			    <attribute name="Java-Version" value="${java.version}"/>
+			   	<attribute name="Created-By" value="${company}(${build.time})"/>
 				<attribute name="BuildDate" value="${build.time}"/>
 			</manifest>				
 		</jar>
 </target>
+	
 
 	<!-- ================================================================== -->
 	<!-- D I S T R I B U T I O N  Targets                                   -->
@@ -109,5 +124,10 @@
 	<target name="clean">
 		<delete dir="${build.dir}" />
 	</target>
+	
+	 <target name="javadoc" depends="init" description="Generate Documentation">
+	    <javadoc sourcepath="${src.dir}" destdir="${javadoc.dir}" classpathref="classpath"/>
+	  </target>	
+
 
 </project>
