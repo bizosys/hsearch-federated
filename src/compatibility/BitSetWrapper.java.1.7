@@ -1,0 +1,176 @@
+package com.bizosys.hsearch.federate;
+
+import java.nio.ByteBuffer;
+import java.util.BitSet;
+
+public final class BitSetWrapper{
+	
+	BitSet bitset = null;
+	
+	public BitSetWrapper() {
+		bitset = new BitSet();
+	}
+
+	public BitSetWrapper(int nbits) {
+		bitset = new BitSet(nbits);
+	}
+	
+	public BitSetWrapper(BitSet bitset){
+		this.bitset = bitset; 
+	}
+
+	public final byte[] toByteArray() {
+		return bitset.toByteArray();
+	}
+	
+    public static final BitSetWrapper valueOf(final byte[] bytes) {
+        return new BitSetWrapper(BitSet.valueOf(ByteBuffer.wrap(bytes)));
+    }
+    
+    public static final BitSetWrapper valueOf(final ByteBuffer bb) {
+        return new BitSetWrapper(BitSet.valueOf(bb));
+    }
+
+
+	public final long[] toLongArray() {
+		return bitset.toLongArray();
+	}
+
+	
+	public final void flip(final int bitIndex) {
+		bitset.flip(bitIndex);
+	}
+
+	
+	public final void flip(final int fromIndex, final int toIndex) {
+		bitset.flip(fromIndex, toIndex);
+	}
+
+	
+	public final void set(final int bitIndex) {
+		bitset.set(bitIndex);
+	}
+
+	
+	public final void set(final int bitIndex, final boolean value) {
+		bitset.set(bitIndex, value);
+	}
+
+	
+	public final void set(final int fromIndex, final int toIndex) {
+		bitset.set(fromIndex, toIndex);
+	}
+
+	
+	public final void set(final int fromIndex, final int toIndex, final boolean value) {
+		bitset.set(fromIndex, toIndex, value);
+	}
+
+	
+	public final void clear(final int bitIndex) {
+		bitset.clear(bitIndex);
+	}
+
+	
+	public final void clear(final int fromIndex, final int toIndex) {
+		bitset.clear(fromIndex, toIndex);
+	}
+
+	
+	public final void clear() {
+		bitset.clear();
+	}
+
+	
+	public final boolean get(final int bitIndex) {
+		return bitset.get(bitIndex);
+	}
+
+	
+	public final BitSet get(final int fromIndex, final int toIndex) {
+		return bitset.get(fromIndex, toIndex);
+	}
+
+	
+	public final int nextSetBit(final int fromIndex) {
+		return bitset.nextSetBit(fromIndex);
+	}
+
+	
+	public final int nextClearBit(final int fromIndex) {
+		return bitset.nextClearBit(fromIndex);
+	}
+
+	
+	public final int previousSetBit(final int fromIndex) {
+		return bitset.previousSetBit(fromIndex);
+	}
+
+	public final int previousClearBit(final int fromIndex) {
+		return bitset.previousClearBit(fromIndex);
+	}
+
+	
+	public final int length() {
+		return bitset.length();
+	}
+
+	
+	public final boolean isEmpty() {
+		return bitset.isEmpty();
+	}
+
+	
+	public boolean intersects(final BitSetWrapper set) {
+		return bitset.intersects(set.bitset);
+	}
+
+	
+	public final int cardinality() {
+		return bitset.cardinality();
+	}
+
+	
+	public final void and(final BitSetWrapper set) {
+		bitset.and(set.bitset);
+	}
+
+	
+	public final void or(final BitSetWrapper set) {
+		bitset.or(set.bitset);
+	}
+
+	
+	public final void xor(final BitSetWrapper set) {
+		bitset.xor(set.bitset);
+	}
+	
+	public final void andNot(final BitSetWrapper set) {		
+		bitset.andNot(set.bitset);
+	}
+
+	
+	public final int hashCode() {
+		return bitset.hashCode();
+	}
+
+	public final int size() {
+		return bitset.size();
+	}
+
+	
+	public final boolean equals(final Object obj) {
+		return bitset.equals(obj);
+	}
+
+	
+	public final Object clone() {
+		return bitset.clone();
+	}
+
+	
+	public final String toString() {
+		return bitset.toString();
+	}
+
+}
